@@ -7,12 +7,15 @@ import { Link } from 'react-router-dom';
 
 
 
+
 const CampagnesList = () => {
 
     // Fetch data
     const [currentPage, setCurrentPage] = useState(1);
     const [campagnesPerPage] = useState(10);
     const [campagnes, setCampagnes] = useState([]);
+    const [logs, setLogs] = useState([]);
+
 
     /** TRAITEMENTS */
     const fetchData = async () => {
@@ -23,7 +26,7 @@ const CampagnesList = () => {
         })
             .then(function (response) {
                 setCampagnes(response.data.campagnes)
-                //setLogs(response.data.logs)
+                setLogs(response.data.logs)
             })
             .catch(error => {
                 console.log(error);
@@ -36,6 +39,7 @@ const CampagnesList = () => {
         fetchData()
 
     }, []);
+
 
     // Filter search
     const [search, setSearch] = useState('')
@@ -90,8 +94,9 @@ const CampagnesList = () => {
     const [CampaignCommand, setCampaignCommand] = useState('')
     const [pdfUrl, setPdfUrl] = useState(null);
 
-    const handleDownload = () => {
-        axios.get(`/api/admin/campagne/download/${selectedCampagneId}`, {
+
+    const handleDownload = (campagneId) => {
+        axios.get(`/api/admin/campagne/download/${campagneId}`, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
                 'Accept': "application/pdf"
@@ -108,10 +113,11 @@ const CampagnesList = () => {
             .catch(error => {
                 console.error(error);
             });
+        fetchData()
     }
 
-    const handleValidCampaign = () => {
-        axios.get(`/api/admin/campagne/accept/${selectedCampagneId}`, {
+    const handleValidCampaign = (campagneId) => {
+        axios.get(`/api/admin/campagne/accept/${campagneId}`, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },
@@ -121,22 +127,63 @@ const CampagnesList = () => {
                     icon: 'success',
                     title: response.data.success,
                     showConfirmButton: false,
-                    timer: 1500
+                    timer: 2500
                 })
             })
 
+
             .catch(error => {
                 Swal.fire({
-                    icon: 'success',
-                    title: 'error',
+                    icon: 'error',
+                    title: error.response.data.error,
                     showConfirmButton: false,
-                    timer: 1500
+                    timer: 2500
                 })
                 console.error(error);
             });
 
         fetchData()
     }
+
+    const handleRejectCampaign = (campagneId) => {
+        axios.get(`/api/admin/campagne/reject/${campagneId}`, {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+            },
+        })
+            .then(response => {
+                Swal.fire({
+                    icon: 'success',
+                    title: response.data.success,
+                    showConfirmButton: false,
+                    timer: 2500
+                })
+            })
+
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: error.response.data.error,
+                    showConfirmButton: false,
+                    timer: 2500
+                })
+                console.error(error);
+            });
+
+        fetchData()
+    }
+
+    /** MODAL LOGS */
+    const [allLogsBycampagnes, setAllLogsByCampagnes] = useState(null);
+    const [showModalLogs, setShowModalLogs] = useState(false);
+
+    const handleShowModalLogs = () => {
+        setShowModalLogs(true);
+    };
+
+    const handleCloseModalLogs = () => {
+        setShowModalLogs(false);
+    };
 
     return (
         <div>
@@ -156,61 +203,82 @@ const CampagnesList = () => {
                     <option value="asc">Ascending</option>
                 </select>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Ncommande</th>
-                        <th>Name</th>
-                        <th>Name project</th>
-                        <th>Price</th>
-                        <th>Jours restant</th>
-                        <th>Status</th>
-                        <th>Created at</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {currentCampagnes.map(campagne => (
-                        <tr key={campagne.id}>
-                            <td>{campagne.id}</td>
-                            <td>{campagne.ncommande}</td>
-                            <td>
-                                <Link to={`/admin/profil/details/${campagne.userid}`}>{campagne.name}</Link>
-                            </td>
-                            <td>{campagne.nameproject}</td>
-                            <td>{campagne.price}</td>
-                            <td>{30 - campagne.days}J</td>
-                            <td>{campagne.status}</td>
-                            <td >{campagne.createdAt} </td>
-                            <td style={styles.table__td_relative} onClick={() => {
-                                setSelectedCampagneId(selectedCampagneId === campagne.id ? null : campagne.id)
-                                setCampaignCommand(campagne.ncommande)
-                            }}>
-                                <img className="table__td-relative-img" src={iconActions} alt="" />
-                                {selectedCampagneId === campagne.id && (
-                                    <div className="table__breadcrumb">
-                                        <a onClick={() => {
-                                            handleDownload()
-                                        }}>Télécharger le fichier source</a>
-                                        <Link to={`/admin/campagne/details/${campagne.id}`}>Détails</Link>
-                                        <a onClick={() => { handleValidCampaign() }}>Valider</a>
-                                        {/*
-                                        <a data-id={user.id} onClick={() => {
-                                            setFirstname(user.firstname);
-                                            setLastname(user.lastname);
-                                            setEmail(user.email)
-                                            setId(user.id);
-                                            handleShowModal();
-                                        }}>Modifier</a>
-                                    */}
-                                    </div>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            {currentCampagnes.map(campagne => (
+                <section style={styles.cardCampagne} data-id={campagne.id}>
+                    <div style={styles.cardCampagne_flex}>
+                        <div style={styles.cardCampagne_flex_child}>
+                            <h1 style={styles.title}>{campagne.nameproject}</h1>
+                            <h2 style={styles.ncommande}>{campagne.ncommande}</h2>
+                            <h3 style={styles.createdat}>{campagne.createdAt}</h3>
+                        </div>
+                        <div style={styles.cardCampagne_flex_child}>
+                            <h4 style={styles.title}>ID : {campagne.id}</h4>
+                        </div>
+                        <div style={styles.cardCampagne_flex_child}>
+                            <h5 style={styles.orangePrimary}>{campagne.status}</h5>
+
+                        </div>
+                    </div>
+                    <div style={styles.cardCampagne_flex}>
+                        <div style={styles.cardCampagne_flex_child}>
+                            <h6 style={styles.subtitle}>Creator information</h6>
+                            <p style={styles.paragraph}>{campagne.name}</p>
+                            <p style={styles.paragraph}>
+                                {campagne.roles.map(role => (
+                                    <>
+                                        {role + ' '}
+                                    </>
+                                ))}
+                            </p>
+                        </div>
+                        <div style={styles.cardCampagne_flex_child}>
+                            <h6 style={styles.subtitle}>Creator information</h6>
+                            <p style={styles.paragraph}>{campagne.filename}</p>
+                            <p style={styles.paragraph}>Paper {campagne.paper}</p>
+                            <p style={styles.paragraph}>{campagne.size} - {campagne.weight}GR</p>
+                        </div>
+                        <div style={styles.cardCampagne_flex_child}>
+                            <div style={styles.flexGroup}>
+                                <div>
+                                    <h6 style={styles.subtitle}>Price</h6>
+                                    <p style={styles.paragraph}>{campagne.price}</p>
+                                </div>
+                                <div>
+                                    <h6 style={styles.subtitle}>Days</h6>
+                                    <p style={styles.paragraph}>{30 - campagne.days}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style={Object.assign({},
+                        { ...styles.flexLinks },
+                        { ...styles.orangePrimary }
+                    )}>
+                        <div>
+                            <Link style={styles.linkstyle} to={`/admin/campagne/details/${campagne.id}`}>Show details</Link>
+                        </div>
+                        <div>
+                            <a style={styles.linkstyle} onClick={() => handleDownload(campagne.id)} >Download file</a>
+                        </div>
+                        <div>
+                            <a style={styles.linkstyle} onClick={() => { campagne.acceptedAt == '' ? handleValidCampaign(campagne.id) : false }}>Accept</a>
+                            <p style={styles.paragraph}>{campagne.acceptedAt !== '' ? campagne.acceptedAt : null}</p>
+                        </div>
+                        <div>
+                            <a style={styles.linkstyle} onClick={() => { campagne.rejectAt == '' ? handleRejectCampaign(campagne.id) : false }}>Reject</a>
+                            <p style={styles.paragraph}>{campagne.rejectAt !== '' ? campagne.rejectAt : null}</p>
+                        </div>
+                        <div>
+                            <a style={styles.linkstyle} data-id={campagne.id} onClick={() => {
+                                const campagneLogs = logs.filter(log => log.campagneid === campagne.id);
+                                console.log(campagneLogs)
+                                setAllLogsByCampagnes(campagneLogs)
+                                handleShowModalLogs()
+                            }}>View logs</a>
+                        </div>
+                    </div>
+                </section>
+            ))}
 
             <ReactPaginate
                 breakLabel="..."
@@ -223,6 +291,25 @@ const CampagnesList = () => {
                 containerClassName="pagination"
                 activeClassName="active"
             />
+
+            {/* Modal Logs */}
+            {
+                showModalLogs && (
+                    <div style={styles.modalContainer}>
+                        <div onClick={handleCloseModalLogs}>Fermer</div>
+                        <div style={styles.modalContainerContent}>
+                            {allLogsBycampagnes.length > 0 ? allLogsBycampagnes.map(loge => (
+                                <>
+                                    <p key={loge.logId}>{loge.logId}</p>
+                                    <p>{loge.campagneid}</p>
+                                    <p>{loge.message}</p>
+                                    <p>{loge.code}</p>
+                                </>
+                            )) : <p>Pas de logs</p>}
+                        </div>
+                    </div>
+                )
+            }
         </div>
     )
 }
@@ -264,6 +351,61 @@ const styles = {
         height: '320px',
         overflow: 'scroll',
         padding: '25px'
+    },
+    cardCampagne: {
+        height: '100%',
+        padding: '17px',
+        border: '2px solid #F2F2F2',
+        borderRadius: '11px',
+        margin: '15px 0px',
+    },
+    cardCampagne_flex: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '18px',
+        width: '100%',
+        gap: '50px'
+    },
+    cardCampagne_flex_child: {
+        width: '100%'
+    },
+    title: {
+        fontSize: '18px',
+        color: '#1C1C1C',
+        textTransform: 'capitalize'
+    },
+    ncommande: {
+        fontSize: '16px',
+        color: 'rgba(0, 0, 0, 0.6)'
+    },
+    createdat: {
+        fontSize: '13px',
+        color: 'rgba(0, 0, 0, 0.6)'
+    },
+    orangePrimary: {
+        color: '#F54E31'
+    },
+    subtitle: {
+        fontSize: '12px',
+        color: 'rgba(0, 0, 0, 0.6)'
+    },
+    paragraph: {
+        fontSize: '13px',
+    },
+    flexGroup: {
+        display: 'flex',
+        gap: '100px',
+    },
+    flexLinks: {
+        display: 'flex',
+        gap: '40px',
+        marginTop: '25x'
+    },
+    linkstyle: {
+        color: '#F54E31',
+        fontSize: '13.5px',
+        cursor: 'pointer',
+        textDecoration: 'none'
     }
 }
 

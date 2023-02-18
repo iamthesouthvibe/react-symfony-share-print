@@ -4,7 +4,7 @@ import arrowRright from '../../images/arrow-right.svg';
 import iconUser from '../../images/icon-userprofile.svg';
 
 const Sidebar = () => {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
 
     const handleOpen = () => {
         setOpen(!open);

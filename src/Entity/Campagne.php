@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CampagneRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -53,6 +55,23 @@ class Campagne
 
     #[ORM\OneToOne(mappedBy: 'campagne', cascade: ['persist', 'remove'])]
     private ?Product $product = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $slug = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $acceptedAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $rejectAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'campagne', targetEntity: CampagneLog::class)]
+    private Collection $campagneLogs;
+
+    public function __construct()
+    {
+        $this->campagneLogs = new ArrayCollection();
+    }
 
     /*  #[ORM\OneToOne(mappedBy: 'campagne', cascade: ['persist', 'remove'])]
     private ?Product $product = null;*/
@@ -225,6 +244,72 @@ class Campagne
         }
 
         $this->product = $product;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(?string $slug): self
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getAcceptedAt(): ?\DateTimeImmutable
+    {
+        return $this->acceptedAt;
+    }
+
+    public function setAcceptedAt(?\DateTimeImmutable $acceptedAt): self
+    {
+        $this->acceptedAt = $acceptedAt;
+
+        return $this;
+    }
+
+    public function getRejectAt(): ?\DateTimeImmutable
+    {
+        return $this->rejectAt;
+    }
+
+    public function setRejectAt(?\DateTimeImmutable $rejectAt): self
+    {
+        $this->rejectAt = $rejectAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CampagneLog>
+     */
+    public function getCampagneLogs(): Collection
+    {
+        return $this->campagneLogs;
+    }
+
+    public function addCampagneLog(CampagneLog $campagneLog): self
+    {
+        if (!$this->campagneLogs->contains($campagneLog)) {
+            $this->campagneLogs->add($campagneLog);
+            $campagneLog->setCampagne($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCampagneLog(CampagneLog $campagneLog): self
+    {
+        if ($this->campagneLogs->removeElement($campagneLog)) {
+            // set the owning side to null (unless already changed)
+            if ($campagneLog->getCampagne() === $this) {
+                $campagneLog->setCampagne(null);
+            }
+        }
 
         return $this;
     }

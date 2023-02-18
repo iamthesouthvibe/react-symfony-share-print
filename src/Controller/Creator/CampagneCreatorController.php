@@ -2,23 +2,23 @@
 
 namespace App\Controller\Creator;
 
-use App\Entity\User;
 use App\Entity\Campagne;
+use App\Entity\CampagneStatus;
 use App\Entity\PaperSize;
 use App\Entity\PaperStyle;
-use Spatie\PdfToImage\Pdf;
 use App\Entity\PaperWeight;
-use App\Entity\CampagneStatus;
-use App\Services\LogServices;
+use App\Entity\User;
 use App\Services\EmailService;
+use App\Services\LogServices;
 use Doctrine\ORM\EntityManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Spatie\PdfToImage\Pdf;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 
 class CampagneCreatorController extends AbstractController
 {
@@ -113,7 +113,7 @@ class CampagneCreatorController extends AbstractController
             $campagne->setPrice($request->request->get('price'));
             $campagne->setDescription($request->request->get('description'));
             $campagne->setStatus($em->getRepository(CampagneStatus::class)->findOneBy(['id' => 1], []));
-            
+
             $campagne->setUser($user);
             $campagne->setCreatedAt(new \DateTimeImmutable());
             $user->setRoles(['ROLE_CREATOR', 'ROLE_USER']);
@@ -127,23 +127,23 @@ class CampagneCreatorController extends AbstractController
         }
 
         // Log
-        $LogServices->createLog($user, 'Une nouvelle campagne ' . $campagne->getId() . ' a été crée par ' . $user->getEmail() , 'CAMPAGNE');
+        $LogServices->createLog($user, 'Une nouvelle campagne '.$campagne->getId().' a été crée par '.$user->getEmail(), 'CAMPAGNE');
+        $LogServices->createCampagneLog($campagne, 'Campagne crée', 'CAMPAGNE_CREATE');
 
         $emailService->sendEmail(
-            'emails/template.html.twig', 
+            'emails/template.html.twig',
             [
-                'firstName' => $user->getFirstName() ?? '', 
+                'firstName' => $user->getFirstName() ?? '',
                 'lastName' => $user->getLastName() ?? '',
-                'message' => 'Votre campagne a bien été soumise. Vous recevrez un email de confirmation quand votre produit sera en ligne'
-            ], 
+                'message' => 'Votre campagne a bien été soumise. Vous recevrez un email de confirmation quand votre produit sera en ligne',
+            ],
             $user->getEmail(),
             'Votre campagne a bien été soumise'
         );
 
         // Log
-        $LogServices->createLog($user, 'Un email de confirmation a été envoyé pour la campagne ' . $campagne->getId() . ' à ' . $user->getEmail() , 'CAMPAGNE');
+        $LogServices->createLog($user, 'Un email de confirmation a été envoyé pour la campagne '.$campagne->getId().' à '.$user->getEmail(), 'CAMPAGNE');
 
-        
         // Envoi d'une réponse de succès
         return new JsonResponse(['message' => 'Campagne add successfully'], 201);
     }
