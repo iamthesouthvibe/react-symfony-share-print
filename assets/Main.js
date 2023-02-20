@@ -14,19 +14,22 @@ import AdminProfil from './Pages/AdminProfil';
 import AminProfilDetails from './Pages/AminProfilDetails';
 import AdminCampagneOverview from './Pages/AdminCampagneOverview';
 import AdminCampagneDetails from './Pages/AdminCampagneDetails';
-
-
+import Shop from './Pages/Shop';
+import ShopProductDetails from './Pages/ShopProductDetails';
+import Card from './Pages/Card';
 
 function Main() {
     const { isAuthenticated, userRole } = useAuth();
 
-    console.log(isAuthenticated, userRole)
     return (
         <ErrorBoundary>
             <Router>
                 <Routes>
                     <Route exact path="/" element={<Home />} />
+                    <Route exact path="/shop" element={<Shop />} />
+                    <Route exact path="/shop/product/details/:slug" element={<ShopProductDetails />} />
                     <Route exact path="/login" element={<Login />} />
+                    <Route exact path="/card" element={<Card />} />
                     <Route exact path="/register" element={<Register />} />
                     <Route exact path="/create_campagne" element={<CampagneCreate />} />
                     {isAuthenticated && userRole.includes('ROLE_USER') ? <Route exact path="/account" element={<Account />} /> : <Route exact path="/account" element={<Navigate to="/login" />} />}

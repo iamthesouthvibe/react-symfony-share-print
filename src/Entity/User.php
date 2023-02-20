@@ -3,13 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
-use Doctrine\Common\Collections\ArrayCollection;
-
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
@@ -49,14 +48,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Campagne::class, orphanRemoval: true)]
+    private Collection $campagnes;
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserLog::class, orphanRemoval: true)]
     private Collection $userLogs;
 
     public function __construct()
     {
         $this->addresses = new ArrayCollection();
+        $this->campagnes = new ArrayCollection();
         $this->userLogs = new ArrayCollection();
-
     }
 
     public function getId(): ?int
@@ -239,6 +241,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
             // set the owning side to null (unless already changed)
             if ($userLog->getUser() === $this) {
                 $userLog->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Campagne>
+     */
+    public function getCampagnes(): Collection
+    {
+        return $this->campagnes;
+    }
+
+    public function addCampagne(Campagne $campagne): self
+    {
+        if (!$this->campagnes->contains($campagne)) {
+            $this->campagnes->add($campagne);
+            $campagne->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCampagne(Campagne $campagne): self
+    {
+        if ($this->campagnes->removeElement($campagne)) {
+            // set the owning side to null (unless already changed)
+            if ($campagne->getUser() === $this) {
+                $campagne->setUser(null);
             }
         }
 

@@ -12,6 +12,7 @@
         "doctrine/orm": "^2.14",
         "lexik/jwt-authentication-bundle": "^2.16",
         "spatie/pdf-to-image": "^2.2",
+        "stripe/stripe-php": "^10.6",
         "symfony/console": "6.0.*",
         "symfony/doctrine-messenger": "6.0.*",
         "symfony/dotenv": "6.0.*",
