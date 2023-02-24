@@ -68,9 +68,13 @@ class Campagne
     #[ORM\OneToMany(mappedBy: 'campagne', targetEntity: CampagneLog::class)]
     private Collection $campagneLogs;
 
+    #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'campagne')]
+    private Collection $orders;
+
     public function __construct()
     {
         $this->campagneLogs = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
 
     /*  #[ORM\OneToOne(mappedBy: 'campagne', cascade: ['persist', 'remove'])]
@@ -309,6 +313,33 @@ class Campagne
             if ($campagneLog->getCampagne() === $this) {
                 $campagneLog->setCampagne(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): self
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->addCampagne($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): self
+    {
+        if ($this->orders->removeElement($order)) {
+            $order->removeCampagne($this);
         }
 
         return $this;

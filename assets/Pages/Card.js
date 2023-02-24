@@ -61,10 +61,25 @@ const Card = () => {
 
     const [checkoutSessionId, setCheckoutSessionId] = useState(null);
 
-    const handleSubmit = () => {
-        console.log('ok')
+
+    /* Formulaire et checkout */
+    // Data
+    const [firstname, setFirstname] = useState('')
+    const [lastname, setLastname] = useState('')
+    const [country, setCountry] = useState('')
+    const [address, setaddress] = useState('')
+    const [zip, setZip] = useState('')
+    const [city, setCity] = useState('')
+    const [mobile, setMobile] = useState('')
+    const [email, setEmail] = useState('')
+    const [isSaving, setIsSaving] = useState(false)
+
+    // Traitement
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const customerData = [firstname, lastname, country, address, zip, city, mobile, email];
         calculateTotalPrice();
-        axios.post('/api/card/checkout', cartItems)
+        axios.post('/api/card/checkout', { cartItems, customerData })
             .then(response => {
                 const { checkout_session_id } = response.data;
                 setCheckoutSessionId(checkout_session_id);
@@ -79,25 +94,70 @@ const Card = () => {
                     timer: 2500
                 })
             });
-
     };
 
     return (
         <div>
             <Layout>
                 <p>card</p>
-                {cartItems.map(item => (
-                    <div key={item.id}>
-                        <p>{item.name}</p>
-                        <p>{item.price}€</p>
-                        <button onClick={() => decrementQuantity(item.id)}>-</button>
-                        <p>{item.quantity}</p>
-                        <button onClick={() => incrementQuantity(item.id)}>+</button>
-                        <button onClick={() => removeFromCart(item.id)}>Remove</button>
-                    </div>
-                ))}
-                <p>Prix total : {totalPrice}€</p>
-                <button onClick={handleSubmit}>Checkout</button>
+                <div>
+                    <form>
+                        <label>
+                            First name
+                        <input value={firstname} onChange={e => (setFirstname(e.target.value))} type="text"></input>
+                        </label>
+                        <br />
+                        <label>
+                            Last name
+                        <input value={lastname} onChange={e => (setLastname(e.target.value))} type="text"></input>
+                        </label>
+                        <br />
+                        <label>
+                            country
+                        <input value={country} onChange={e => (setCountry(e.target.value))} type="text"></input>
+                        </label>
+                        <br />
+                        <label>
+                            Address
+                        <input value={address} onChange={e => (setAddress(e.target.value))} type="text"></input>
+                        </label>
+                        <br />
+                        <label>
+                            City
+                        <input value={city} onChange={e => (setCity(e.target.value))} type="text"></input>
+                        </label>
+                        <br />
+                        <label>
+                            Zip
+                        <input value={zip} onChange={e => (setZip(e.target.value))} type="text"></input>
+                        </label>
+                        <br />
+                        <label>
+                            Phone
+                        <input value={mobile} onChange={e => (setMobile(e.target.value))} type="text"></input>
+                        </label>
+                        <br />
+                        <label>
+                            Email
+                        <input value={email} onChange={e => (setEmail(e.target.value))} type="email"></input>
+                        </label>
+                        <br />
+                    </form>
+                </div>
+                <div>
+                    {cartItems.map(item => (
+                        <div key={item.id}>
+                            <p>{item.name}</p>
+                            <p>{item.price}€</p>
+                            <button onClick={() => decrementQuantity(item.id)}>-</button>
+                            <p>{item.quantity}</p>
+                            <button onClick={() => incrementQuantity(item.id)}>+</button>
+                            <button onClick={() => removeFromCart(item.id)}>Remove</button>
+                        </div>
+                    ))}
+                    <p>Prix total : {totalPrice}€</p>
+                    <button onClick={handleSubmit}>Checkout</button>
+                </div>
             </Layout>
         </div>
     );

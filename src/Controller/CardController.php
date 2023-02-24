@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Campagne;
+use App\Entity\Order;
+use Doctrine\ORM\EntityManagerInterface;
 use Stripe\Checkout\Session;
 use Stripe\Product;
 use Stripe\Stripe;
@@ -16,20 +19,18 @@ class CardController extends AbstractController
     #[Route('/api/card/checkout', name: 'app_card_checkout')]
     public function checkout(Request $request, SessionInterface $session)
     {
-        $cartItems = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-        if (count($cartItems) < 1) {
+        if (count($data['cartItems']) < 1) {
             return new JsonResponse(['error' => 'Erreur, votre panier est vide'], 400);
         }
-
-        // return new JsonResponse(['cartItems' => $cartItems]);
 
         // Initialisez Stripe avec les clés
         Stripe::setApiKey('sk_test_51LuG3LBECGZCUwAYsMyyQr9O86E7bX9ymy6U1vlUS31m4pIpZVs08eWenTXWGB3Be5cEu4FPmDG3YK6157NpXm69002Ioa9CIA');
 
         // Construction de la liste des items de la session
         $lineItems = [];
-        foreach ($cartItems as $cartItem) {
+        foreach ($data['cartItems'] as $cartItem) {
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'eur',
@@ -50,6 +51,16 @@ class CardController extends AbstractController
         $checkoutSession = Session::create([
             'payment_method_types' => ['card'],
             'line_items' => $lineItems,
+            'metadata' => [
+                'firstname' => $data['customerData'][0],
+                'lastname' => $data['customerData'][1],
+                'country' => $data['customerData'][2],
+                'address' => $data['customerData'][3],
+                'zip' => $data['customerData'][4],
+                'city' => $data['customerData'][5],
+                'mobile' => $data['customerData'][6],
+                'email' => $data['customerData'][7],
+            ],
             'mode' => 'payment',
             'success_url' => 'http://127.0.0.1:8000/success?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => 'http://127.0.0.1:8000/cancel',
@@ -76,7 +87,7 @@ class CardController extends AbstractController
   }
 
     #[Route('/success', name: 'app_success')]
-    public function success(Request $request, SessionInterface $session)
+    public function success(EntityManagerInterface $em, Request $request, SessionInterface $session)
     {
         // Récupérer l'ID de la session de paiement dans l'URL de la requête
         $sessionId = $request->query->get('session_id');
@@ -88,18 +99,36 @@ class CardController extends AbstractController
         // Vérifier l'état de paiement
         if ($session->payment_status === 'paid') {
             // Paiement réussi
+            // Créer une nouvelle commande
+
+            $order = new Order();
+
+            $order->setCustomerFirstname($session->metadata->firstname);
+            $order->setCustomerLastname($session->metadata->lastname);
+            $order->setCustomerCountry($session->metadata->country);
+            $order->setCustomerZip($session->metadata->zip);
+            $order->setCustomerAddress($session->metadata->address);
+            $order->setCustomerCity($session->metadata->city);
+            $order->setCustomerEmail($session->metadata->email);
+            $order->setCustomerMobile($session->metadata->mobile);
+
             $line_items = Session::allLineItems($sessionId);
             foreach ($line_items->data as $line_item) {
                 $productId = $line_item->price->product;
                 $product = Product::retrieve($productId);
                 $productName = $product->name;
                 $productMetadata = $product->metadata;
-                dump($productMetadata);
-                // $metadata = $line_item->price->product->metadata;
-            // dump($line_item);
-            // do something with metadata
+                // dump($productMetadata->idcampagne);
+
+                $order->addCampagne($em
+                ->getRepository(Campagne::class)
+                ->find($productMetadata->idcampagne));
             }
-            exit;
+
+            $em->persist($order);
+            $em->flush();
+
+            return new JsonResponse(['success' => 'success']);
         // return $this->render('success.html.twig', ['message' => 'Paiement réussi!']);
         } else {
             // Paiement échoué ou en attente
