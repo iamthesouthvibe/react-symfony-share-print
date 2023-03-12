@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Campagne;
+use App\Entity\CampagneOrder;
 use App\Entity\Order;
+use App\Entity\User;
+use App\Services\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Stripe\Checkout\Session;
 use Stripe\Product;
@@ -32,18 +35,19 @@ class CardController extends AbstractController
         $lineItems = [];
         foreach ($data['cartItems'] as $cartItem) {
             $lineItems[] = [
+                'quantity' => $cartItem['quantity'],
                 'price_data' => [
                     'currency' => 'eur',
                     'unit_amount' => $cartItem['price'] * 100, // Prix en centimes d'euro
                     'product_data' => [
                         'name' => $cartItem['name'],
                         'metadata' => [
+                            'quantity' => $cartItem['quantity'],
                             'bonsoir' => 'bonsoir',
                             'idcampagne' => $cartItem['id'], // Ajouter l'ID du produit
                         ],
                     ],
                 ],
-                'quantity' => $cartItem['quantity'],
             ];
         }
 
@@ -62,7 +66,7 @@ class CardController extends AbstractController
                 'email' => $data['customerData'][7],
             ],
             'mode' => 'payment',
-            'success_url' => 'http://127.0.0.1:8000/success?session_id={CHECKOUT_SESSION_ID}',
+            'success_url' => 'http://127.0.0.1:8000/success_payment?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => 'http://127.0.0.1:8000/cancel',
         ]);
 
@@ -75,19 +79,19 @@ class CardController extends AbstractController
     }
 
     #[Route('/checkout/{checkoutSessionId}', name: 'app_checkout')]
-  public function stripeCheckout(string $checkoutSessionId)
-  {
-      Stripe::setApiKey('sk_test_51LuG3LBECGZCUwAYsMyyQr9O86E7bX9ymy6U1vlUS31m4pIpZVs08eWenTXWGB3Be5cEu4FPmDG3YK6157NpXm69002Ioa9CIA');
+    public function stripeCheckout(string $checkoutSessionId)
+    {
+        Stripe::setApiKey('sk_test_51LuG3LBECGZCUwAYsMyyQr9O86E7bX9ymy6U1vlUS31m4pIpZVs08eWenTXWGB3Be5cEu4FPmDG3YK6157NpXm69002Ioa9CIA');
 
-      // Récupérer la session de checkout depuis l'ID
-      $session = Session::retrieve($checkoutSessionId);
+        // Récupérer la session de checkout depuis l'ID
+        $session = Session::retrieve($checkoutSessionId);
 
-      // Rediriger l'utilisateur vers la page de paiement de Stripe
-      return $this->redirect($session->url);
-  }
+        // Rediriger l'utilisateur vers la page de paiement de Stripe
+        return $this->redirect($session->url);
+    }
 
-    #[Route('/success', name: 'app_success')]
-    public function success(EntityManagerInterface $em, Request $request, SessionInterface $session)
+    #[Route('/api/success_payment', name: 'app_success')]
+    public function success(EntityManagerInterface $em, Request $request, SessionInterface $session, EmailService $emailService)
     {
         // Récupérer l'ID de la session de paiement dans l'URL de la requête
         $sessionId = $request->query->get('session_id');
@@ -96,46 +100,87 @@ class CardController extends AbstractController
         Stripe::setApiKey('sk_test_51LuG3LBECGZCUwAYsMyyQr9O86E7bX9ymy6U1vlUS31m4pIpZVs08eWenTXWGB3Be5cEu4FPmDG3YK6157NpXm69002Ioa9CIA');
         $session = Session::retrieve($sessionId);
 
-        // Vérifier l'état de paiement
-        if ($session->payment_status === 'paid') {
-            // Paiement réussi
-            // Créer une nouvelle commande
+        // Vérifier si un objet Order existe pour l'ID de session de paiement
+        $order = $em->getRepository(Order::class)->findOneBy(['sessionId' => $sessionId]);
 
-            $order = new Order();
+        if (!$order) {
+            // Vérifier l'état de paiement
+            if ($session->payment_status === 'paid') {
+                // Paiement réussi
+                // Créer une nouvelle commande
+                $order = new Order();
 
-            $order->setCustomerFirstname($session->metadata->firstname);
-            $order->setCustomerLastname($session->metadata->lastname);
-            $order->setCustomerCountry($session->metadata->country);
-            $order->setCustomerZip($session->metadata->zip);
-            $order->setCustomerAddress($session->metadata->address);
-            $order->setCustomerCity($session->metadata->city);
-            $order->setCustomerEmail($session->metadata->email);
-            $order->setCustomerMobile($session->metadata->mobile);
+                $order->setCustomerFirstname($session->metadata->firstname);
+                $order->setCustomerLastname($session->metadata->lastname);
+                $order->setCustomerCountry($session->metadata->country);
+                $order->setCustomerZip($session->metadata->zip);
+                $order->setCustomerAddress($session->metadata->address);
+                $order->setCustomerCity($session->metadata->city);
+                $order->setCustomerEmail($session->metadata->email);
+                $order->setCustomerMobile($session->metadata->mobile);
+                $order->setCreatedAt(new \DateTimeImmutable());
+                $order->setStatus($session->payment_status);
+                $order->setSessionId($sessionId);
+                $order->setTotalPrice($session->amount_total / 100);
 
-            $line_items = Session::allLineItems($sessionId);
-            foreach ($line_items->data as $line_item) {
-                $productId = $line_item->price->product;
-                $product = Product::retrieve($productId);
-                $productName = $product->name;
-                $productMetadata = $product->metadata;
-                // dump($productMetadata->idcampagne);
+                $user = $em->getRepository(User::class)->findOneBy(['email' => $session->metadata->email]);
+                if ($user) {
+                    $order->setUser($user);
+                }
 
-                $order->addCampagne($em
-                ->getRepository(Campagne::class)
-                ->find($productMetadata->idcampagne));
+                $em->persist($order);
+
+                // Récupére toutes les commandes de la session
+                $line_items = Session::allLineItems($sessionId);
+                foreach ($line_items->data as $line_item) {
+                    $productId = $line_item->price->product;
+                    $product = Product::retrieve($productId);
+                    $productName = $product->name;
+                    $productMetadata = $product->metadata;
+
+                    // Creation de campagneorder
+                    $campagneOrder = new CampagneOrder();
+                    $campagneOrder->setCampagne($em
+                    ->getRepository(Campagne::class)
+                    ->find($productMetadata->idcampagne));
+                    $campagneOrder->setPurchase($order);
+                    $campagneOrder->setQuantity($productMetadata->quantity);
+
+                    $em->persist($campagneOrder);
+                }
+
+                $em->flush();
+
+                $campagneOrders = $em->getRepository(CampagneOrder::class)->findBy(['purchase' => $order]);
+                // Email
+                $emailService->sendEmail(
+                'emails/success-payment.html.twig',
+                [
+                    'name' => $session->metadata->firstname,
+                    'campagneOrders' => $campagneOrders,
+                    'createdAt' => $order->getCreatedAt()->format('Y-m-d'),
+                ],
+                $session->metadata->email,
+                'Merci pour votre commande !'
+            );
+
+                return new JsonResponse(['success' => 'Votre commande a été realisé avec succés'], 200);
+            } else {
+                $emailService->sendEmail(
+                    'emails/success-payment.html.twig',
+                    [
+                        'name' => 'Paiement échoué ',
+                        'campagneOrders' => '',
+                        'createdAt' => $order->getCreatedAt()->format('Y-m-d'),
+                    ],
+                    $session->metadata->email,
+                    'Merci pour votre commande !'
+                );
+                // Paiement échoué ou en attente
+                return new JsonResponse(['error' => 'Paiement échoué ou en attente'], 404);
             }
-
-            $em->persist($order);
-            $em->flush();
-
-            return new JsonResponse(['success' => 'success']);
-        // return $this->render('success.html.twig', ['message' => 'Paiement réussi!']);
         } else {
-            // Paiement échoué ou en attente
-            var_dump('failed');
-            exit;
-
-            return $this->render('success.html.twig', ['message' => 'Le paiement a échoué ou est en attente.']);
+            return new JsonResponse(['error' => 'La session a expirée, vous allez etre redirigé vers la page d\'accueil'], 404);
         }
     }
 }

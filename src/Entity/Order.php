@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -15,9 +16,6 @@ class Order
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\ManyToMany(targetEntity: Campagne::class, inversedBy: 'orders')]
-    private Collection $campagne;
 
     #[ORM\Column(length: 255)]
     private ?string $customerFirstname = null;
@@ -43,38 +41,32 @@ class Order
     #[ORM\Column(length: 255)]
     private ?string $customerEmail = null;
 
+    #[ORM\OneToMany(mappedBy: 'purchase', targetEntity: CampagneOrder::class)]
+    private Collection $campagneOrders;
+
+    #[ORM\ManyToOne(inversedBy: 'orders')]
+    private ?User $user = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $status = null;
+
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $sessionId = null;
+
+    #[ORM\Column]
+    private ?float $total_price = null;
+
     public function __construct()
     {
-        $this->campagne = new ArrayCollection();
+        $this->campagneOrders = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    /**
-     * @return Collection<int, Campagne>
-     */
-    public function getCampagne(): Collection
-    {
-        return $this->campagne;
-    }
-
-    public function addCampagne(Campagne $campagne): self
-    {
-        if (!$this->campagne->contains($campagne)) {
-            $this->campagne->add($campagne);
-        }
-
-        return $this;
-    }
-
-    public function removeCampagne(Campagne $campagne): self
-    {
-        $this->campagne->removeElement($campagne);
-
-        return $this;
     }
 
     public function getCustomerFirstname(): ?string
@@ -169,6 +161,96 @@ class Order
     public function setCustomerEmail(string $customerEmail): self
     {
         $this->customerEmail = $customerEmail;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CampagneOrder>
+     */
+    public function getCampagneOrders(): Collection
+    {
+        return $this->campagneOrders;
+    }
+
+    public function addCampagneOrder(CampagneOrder $campagneOrder): self
+    {
+        if (!$this->campagneOrders->contains($campagneOrder)) {
+            $this->campagneOrders->add($campagneOrder);
+            $campagneOrder->setPurchase($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCampagneOrder(CampagneOrder $campagneOrder): self
+    {
+        if ($this->campagneOrders->removeElement($campagneOrder)) {
+            // set the owning side to null (unless already changed)
+            if ($campagneOrder->getPurchase() === $this) {
+                $campagneOrder->setPurchase(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getSessionId(): ?string
+    {
+        return $this->sessionId;
+    }
+
+    public function setSessionId(string $sessionId): self
+    {
+        $this->sessionId = $sessionId;
+
+        return $this;
+    }
+
+    public function getTotalPrice(): ?float
+    {
+        return $this->total_price;
+    }
+
+    public function setTotalPrice(float $total_price): self
+    {
+        $this->total_price = $total_price;
 
         return $this;
     }

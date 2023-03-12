@@ -67,7 +67,7 @@ const Card = () => {
     const [firstname, setFirstname] = useState('')
     const [lastname, setLastname] = useState('')
     const [country, setCountry] = useState('')
-    const [address, setaddress] = useState('')
+    const [address, setAddress] = useState('')
     const [zip, setZip] = useState('')
     const [city, setCity] = useState('')
     const [mobile, setMobile] = useState('')

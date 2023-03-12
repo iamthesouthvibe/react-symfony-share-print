@@ -13,12 +13,16 @@ export const CreatorProfile = () => {
     return <Layout>
         <br />
         {isAuthenticated && userRole.includes('ROLE_USER') && (
-            <Link to="/account">Profil</Link>
+            <>
+                <Link to="/account">Profil</Link>
+                <Link to="/orders">Orders</Link>
+            </>
         )}
         {isAuthenticated && userRole.includes('ROLE_CREATOR') && (
             <>
                 <Link to="/creator_profil">Creator profil</Link>
                 <Link to="/creator_settings">Creator settings</Link>
+                <Link to="/creator_campagnes">Campagnes</Link>
             </>
         )}
         <CreatorProfilForm />

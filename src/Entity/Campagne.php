@@ -42,7 +42,7 @@ class Campagne
 
     #[ORM\ManyToOne(inversedBy: 'campagnes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?PaperWeight $weight = null; 
+    private ?PaperWeight $weight = null;
 
     #[ORM\Column(length: 255)]
     private ?string $num_commande = null;
@@ -68,17 +68,14 @@ class Campagne
     #[ORM\OneToMany(mappedBy: 'campagne', targetEntity: CampagneLog::class)]
     private Collection $campagneLogs;
 
-    #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'campagne')]
-    private Collection $orders;
+    #[ORM\OneToMany(mappedBy: 'campagne', targetEntity: CampagneOrder::class)]
+    private Collection $campagneOrders;
 
     public function __construct()
     {
         $this->campagneLogs = new ArrayCollection();
-        $this->orders = new ArrayCollection();
+        $this->campagneOrders = new ArrayCollection();
     }
-
-    /*  #[ORM\OneToOne(mappedBy: 'campagne', cascade: ['persist', 'remove'])]
-    private ?Product $product = null;*/
 
     public function getId(): ?int
     {
@@ -205,7 +202,7 @@ class Campagne
         return $this;
     }
 
-   public function getStatus(): ?CampagneStatus
+    public function getStatus(): ?CampagneStatus
     {
         return $this->status;
     }
@@ -217,7 +214,7 @@ class Campagne
         return $this;
     }
 
-    /* 
+    /*
     public function getProduct(): ?Product
     {
         return $this->product;
@@ -319,27 +316,30 @@ class Campagne
     }
 
     /**
-     * @return Collection<int, Order>
+     * @return Collection<int, CampagneOrder>
      */
-    public function getOrders(): Collection
+    public function getCampagneOrders(): Collection
     {
-        return $this->orders;
+        return $this->campagneOrders;
     }
 
-    public function addOrder(Order $order): self
+    public function addCampagneOrder(CampagneOrder $campagneOrder): self
     {
-        if (!$this->orders->contains($order)) {
-            $this->orders->add($order);
-            $order->addCampagne($this);
+        if (!$this->campagneOrders->contains($campagneOrder)) {
+            $this->campagneOrders->add($campagneOrder);
+            $campagneOrder->setCampagne($this);
         }
 
         return $this;
     }
 
-    public function removeOrder(Order $order): self
+    public function removeCampagneOrder(CampagneOrder $campagneOrder): self
     {
-        if ($this->orders->removeElement($order)) {
-            $order->removeCampagne($this);
+        if ($this->campagneOrders->removeElement($campagneOrder)) {
+            // set the owning side to null (unless already changed)
+            if ($campagneOrder->getCampagne() === $this) {
+                $campagneOrder->setCampagne(null);
+            }
         }
 
         return $this;

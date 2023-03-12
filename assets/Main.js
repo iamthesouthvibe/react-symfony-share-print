@@ -17,6 +17,9 @@ import AdminCampagneDetails from './Pages/AdminCampagneDetails';
 import Shop from './Pages/Shop';
 import ShopProductDetails from './Pages/ShopProductDetails';
 import Card from './Pages/Card';
+import { SuccessPayment } from './Pages/SuccessPayment';
+import { CreatorCampagnes } from './Pages/CreatorCampagnes';
+import { Orders } from './Pages/Orders';
 
 function Main() {
     const { isAuthenticated, userRole } = useAuth();
@@ -32,9 +35,12 @@ function Main() {
                     <Route exact path="/card" element={<Card />} />
                     <Route exact path="/register" element={<Register />} />
                     <Route exact path="/create_campagne" element={<CampagneCreate />} />
+                    <Route exact path="/success_payment" element={<SuccessPayment />} />
                     {isAuthenticated && userRole.includes('ROLE_USER') ? <Route exact path="/account" element={<Account />} /> : <Route exact path="/account" element={<Navigate to="/login" />} />}
+                    {isAuthenticated && userRole.includes('ROLE_USER') ? <Route exact path="/orders" element={<Orders />} /> : <Route exact path="/account" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_CREATOR') ? <Route exact path="/creator_profil" element={<CreatorProfile />} /> : <Route exact path="/creator_profil" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_CREATOR') ? <Route exact path="/creator_settings" element={<CreatorSettings />} /> : <Route exact path="/creator_settings" element={<Navigate to="/login" />} />}
+                    {isAuthenticated && userRole.includes('ROLE_CREATOR') ? <Route exact path="/creator_campagnes" element={<CreatorCampagnes />} /> : <Route exact path="/creator_campagnes" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/profil/overview" element={<AdminProfil />} /> : <Route exact path="/admin/profil/overview" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/profil/details/:id" element={<AminProfilDetails />} /> : <Route exact path="/admin/profil/overview" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/profil/delete/:id" element={<AminProfilDetails />} /> : <Route exact path="/admin/profil/overview" element={<Navigate to="/login" />} />}

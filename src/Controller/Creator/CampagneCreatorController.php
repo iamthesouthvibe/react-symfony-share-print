@@ -147,4 +147,56 @@ class CampagneCreatorController extends AbstractController
         // Envoi d'une réponse de succès
         return new JsonResponse(['message' => 'Campagne add successfully'], 201);
     }
+
+    #[Route('/api/account/campagne/list', name: 'app_campagne_account_list')]
+    public function campagneList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request, SluggerInterface $slugger, EmailService $emailService, LogServices $LogServices)
+    {
+        /* DATA */
+        $token = $request->headers->get('Authorization');
+        $token = str_replace('Bearer ', '', $token);
+
+        try {
+            $data = $jwtEncoder->decode($token);
+        } catch (JWTDecodeFailureException $e) {
+            return new JsonResponse(['error' => 'You should to be connect for post campagne']);
+        }
+
+        $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'You should to be connect for post campagne']);
+        }
+
+        $campagnes = $em->getRepository(Campagne::class)->findBy(['user' => $user]);
+
+        $data = [];
+
+        foreach ($campagnes as $campagne) {
+            $createdAt = ($campagne->getCreatedAt() !== null) ? $campagne->getCreatedAt()->format('Y-m-d') : '';
+            $today = date('Y-m-d');
+            $diff = abs(strtotime($today) - strtotime($createdAt));
+            $days = floor($diff / (60 * 60 * 24));
+
+            $data[] = [
+               'id' => $campagne->getId(),
+               'roles' => $campagne->getUser()->getRoles(),
+               'userid' => $campagne->getUser()->getId(),
+               'name' => $campagne->getUser()->getFirstName().' '.$campagne->getUser()->getLastName(),
+               'filename' => $campagne->getFileSource(),
+               'nameproject' => $campagne->getNameProject(),
+               'ncommande' => $campagne->getNumCommande(),
+               'price' => $campagne->getPrice(),
+               'paper' => $campagne->getPaper()->getName(),
+               'size' => $campagne->getSize()->getName(),
+               'weight' => $campagne->getWeight()->getWeight(),
+               'days' => $days,
+               'fileSource' => $campagne->getFileSource().'.png',
+               'filename' => $campagne->getFileSource().'.pdf',
+               'status' => $campagne->getStatus()->getLibelle(),
+               'createdAt' => $createdAt,
+           ];
+        }
+
+        return new JsonResponse(['campagnes' => array_reverse($data)]);
+    }
 }
