@@ -17,9 +17,13 @@ export const CampagneForm = () => {
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
     const [isSaving, setIsSaving] = useState(false)
+    const [tax, setTax] = useState(0.20);
 
     const handleSubmit = (e) => {
-        // setFile(event.target.files[0]);
+
+        const totalTax = parseFloat(price) * parseFloat(tax)
+        const totalPrice = parseFloat(price) + (parseFloat(price) * parseFloat(tax));
+
         e.preventDefault();
         setIsSaving(true);
         let formData = new FormData()
@@ -30,6 +34,8 @@ export const CampagneForm = () => {
         formData.append("weight", weight)
         formData.append("price", price)
         formData.append("description", description)
+        formData.append("totalTax", totalTax)
+        formData.append("totalPrice", totalPrice)
 
         axios.post('/api/campagne/add', formData, {
             headers: {

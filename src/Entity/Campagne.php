@@ -23,7 +23,7 @@ class Campagne
     private ?string $nameProject = null;
 
     #[ORM\Column]
-    private ?int $price = null;
+    private ?float $price = null;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
@@ -70,6 +70,12 @@ class Campagne
 
     #[ORM\OneToMany(mappedBy: 'campagne', targetEntity: CampagneOrder::class)]
     private Collection $campagneOrders;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $totalTax = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $priceAti = null;
 
     public function __construct()
     {
@@ -341,6 +347,30 @@ class Campagne
                 $campagneOrder->setCampagne(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTotalTax(): ?float
+    {
+        return $this->totalTax;
+    }
+
+    public function setTotalTax(?float $totalTax): self
+    {
+        $this->totalTax = $totalTax;
+
+        return $this;
+    }
+
+    public function getPriceAti(): ?float
+    {
+        return $this->priceAti;
+    }
+
+    public function setPriceAti(?float $priceAti): self
+    {
+        $this->priceAti = $priceAti;
 
         return $this;
     }

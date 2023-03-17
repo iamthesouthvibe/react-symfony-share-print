@@ -53,6 +53,20 @@ class CardController extends AbstractController
 
         // Création de la session de checkout Stripe
         $checkoutSession = Session::create([
+            // 'shipping_address_collection' => ['allowed_countries' => ['FR', 'CA']],
+            'shipping_options' => [
+            [
+                'shipping_rate_data' => [
+                'type' => 'fixed_amount',
+                'fixed_amount' => ['amount' => 650, 'currency' => 'EUR'],
+                'display_name' => 'Colissimo',
+                'delivery_estimate' => [
+                    'minimum' => ['unit' => 'business_day', 'value' => 5],
+                    'maximum' => ['unit' => 'business_day', 'value' => 7],
+                ],
+                ],
+            ],
+            ],
             'payment_method_types' => ['card'],
             'line_items' => $lineItems,
             'metadata' => [
@@ -121,6 +135,8 @@ class CardController extends AbstractController
                 $order->setCreatedAt(new \DateTimeImmutable());
                 $order->setStatus($session->payment_status);
                 $order->setSessionId($sessionId);
+                $order->setIsPrint(false);
+                $order->setIsSend(false);
                 $order->setTotalPrice($session->amount_total / 100);
 
                 $user = $em->getRepository(User::class)->findOneBy(['email' => $session->metadata->email]);

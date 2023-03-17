@@ -20,9 +20,7 @@ export const SuccessPayment = () => {
             .catch(error => {
                 console.log(error.response.data.error);
                 setMessage(error.response.data.error)
-                setTimeout(() => {
-                    window.location.pathname = "/";
-                }, 3000);
+
             });
     }
     useEffect(() => {

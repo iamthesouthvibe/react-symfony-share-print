@@ -59,6 +59,12 @@ class Order
     #[ORM\Column]
     private ?float $total_price = null;
 
+    #[ORM\Column]
+    private ?bool $isPrint = null;
+
+    #[ORM\Column]
+    private ?bool $isSend = null;
+
     public function __construct()
     {
         $this->campagneOrders = new ArrayCollection();
@@ -251,6 +257,30 @@ class Order
     public function setTotalPrice(float $total_price): self
     {
         $this->total_price = $total_price;
+
+        return $this;
+    }
+
+    public function getIsPrint(): ?bool
+    {
+        return $this->isPrint;
+    }
+
+    public function setIsPrint(bool $isPrint): self
+    {
+        $this->isPrint = $isPrint;
+
+        return $this;
+    }
+
+    public function getIsSend(): ?bool
+    {
+        return $this->isSend;
+    }
+
+    public function setIsSend(bool $isSend): self
+    {
+        $this->isSend = $isSend;
 
         return $this;
     }

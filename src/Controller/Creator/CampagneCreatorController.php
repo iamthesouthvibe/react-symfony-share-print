@@ -112,6 +112,8 @@ class CampagneCreatorController extends AbstractController
             $campagne->setNameProject($request->request->get('projectName'));
             $campagne->setPrice($request->request->get('price'));
             $campagne->setDescription($request->request->get('description'));
+            $campagne->setTotalTax($request->request->get('totalTax'));
+            $campagne->setPriceAti($request->request->get('totalPrice'));
             $campagne->setStatus($em->getRepository(CampagneStatus::class)->findOneBy(['id' => 1], []));
 
             $campagne->setUser($user);

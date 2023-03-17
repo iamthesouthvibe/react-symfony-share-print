@@ -18,7 +18,8 @@ const Card = () => {
 
     const calculateTotalPrice = () => {
         const totalPrice = cartItems.reduce((acc, item) => acc + item.total, 0);
-        setTotalPrice(totalPrice);
+        const formattedPrice = totalPrice.toFixed(2);
+        setTotalPrice(formattedPrice);;
     };
 
     const incrementQuantity = (id) => {
@@ -61,6 +62,21 @@ const Card = () => {
 
     const [checkoutSessionId, setCheckoutSessionId] = useState(null);
 
+
+    /**   API Rest Countries  */
+    const [countries, setCountries] = useState([]);
+    useEffect(() => {
+        fetch('https://restcountries.com/v3.1/region/europe')
+            .then(response => response.json())
+            .then(data => {
+                const countryList = data.map(country => ({
+                    name: country.name.common,
+                    code: country.cca2,
+                }));
+                setCountries(countryList);
+            })
+            .catch(error => console.error(error));
+    }, []);
 
     /* Formulaire et checkout */
     // Data
@@ -114,7 +130,13 @@ const Card = () => {
                         <br />
                         <label>
                             country
-                        <input value={country} onChange={e => (setCountry(e.target.value))} type="text"></input>
+                            <select value={country} onChange={e => setCountry(e.target.value)}>
+                                {countries.map(country => (
+                                    <option key={country.code} value={country.name}>
+                                        {country.name}
+                                    </option>
+                                ))}
+                            </select>
                         </label>
                         <br />
                         <label>

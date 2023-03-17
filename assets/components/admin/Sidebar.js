@@ -37,12 +37,14 @@ const Sidebar = () => {
                 <div style={styles.navbar__accordion_action} onClick={handleOpen}>
                     <img src={arrowRright} style={open ? styles.navbar__accordion_action_img1_open : styles.navbar__accordion_action_img1} />
                     <img src={iconUser} style={styles.navbar__accordion_action_img2} />
-                    <span>Campagnes</span>
+                    <span>ECommerce</span>
                 </div>
                 {open && (
                     <>
                         <div style={styles.navbar__list_item}>
-                            <Link to="/admin/campagne/overview" style={styles.navbar__list_item_link}>Overview</Link>
+                            <Link to="/admin/campagne/overview" style={styles.navbar__list_item_link}>Campagnes</Link>
+
+                            <Link to="/admin/ecommerce/order" style={styles.navbar__list_item_link}>Orders</Link>
                         </div>
                     </>
                 )}
@@ -88,6 +90,7 @@ const styles = {
     navbar__list_item: {
         paddingLeft: '0px',
         display: 'flex',
+        flexDirection: 'column'
     },
     navbar__list_item_link: {
         padding: '5px 10px',

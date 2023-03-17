@@ -30,7 +30,7 @@ class ShopController extends AbstractController
                'fileSource' => $campagne->getFileSource().'.png',
                'name' => $name,
                'slug' => $campagne->getSlug(),
-               'price' => $campagne->getPrice(),
+               'price' => $campagne->getPriceAti(),
                'paper' => $campagne->getPaper()->getName(),
                'size' => $campagne->getSize()->getName(),
                'weight' => $campagne->getWeight()->getWeight(),
@@ -68,7 +68,7 @@ class ShopController extends AbstractController
                 'status' => $c->getStatus()->getLibelle(),
                 'fileSource' => $c->getFileSource().'.png',
                 'filename' => $c->getFileSource(),
-                'price' => $campagne->getPrice(),
+                'price' => $campagne->getPriceAti(),
             ];
         }
         // Filtrer les campagnes en fonction du statut
@@ -86,7 +86,7 @@ class ShopController extends AbstractController
             'filename' => $campagne->getFileSource(),
             'nameproject' => $campagne->getNameProject(),
             'ncommande' => $campagne->getNumCommande(),
-            'price' => $campagne->getPrice(),
+            'price' => $campagne->getPriceAti(),
             'fileSource' => $campagne->getFileSource().'.png',
             'status' => $campagne->getStatus()->getLibelle(),
             'paper' => $campagne->getPaper()->getName(),
