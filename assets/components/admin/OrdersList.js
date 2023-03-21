@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ReactPaginate from "react-paginate";
+import iconActions from '../../images/icon-actions.svg';
+import { Link } from 'react-router-dom';
 
 export const OrdersList = () => {
 
@@ -53,6 +55,8 @@ export const OrdersList = () => {
     const handleSortOrderChange = event => {
         setSortOrder(event.target.value);
     };
+
+    const [selectedOrderId, setSelectedOrderId] = useState(null);
 
     let filteredOrders = orders;
     function removeAccents(str) {
@@ -114,8 +118,10 @@ export const OrdersList = () => {
                         <th>Created At</th>
                         <th>Name</th>
                         <th>Total Price</th>
+                        <th>Payment status</th>
                         <th>Print status</th>
-                        <th>Print status</th>
+                        <th>Send status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -125,8 +131,19 @@ export const OrdersList = () => {
                             <td>{order.createdAt}</td>
                             <td>{order.customer_name}</td>
                             <td>{order.total_price}€</td>
+                            <td>{order.status}</td>
                             <td>{order.print_status}</td>
                             <td>{order.send_status}</td>
+                            <td style={styles.table__td_relative} onClick={() => {
+                                setSelectedOrderId(selectedOrderId === order.id ? null : order.id);
+                            }}>
+                                <img className="table__td-relative-img" src={iconActions} alt="" />
+                                {selectedOrderId === order.id && (
+                                    <div className="table__breadcrumb">
+                                        <Link to={`/admin/order/details/${order.id}`}>Détails</Link>
+                                    </div>
+                                )}
+                            </td>
                         </tr>
                     ))}
                 </tbody>

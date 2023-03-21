@@ -21,6 +21,7 @@ import { SuccessPayment } from './Pages/SuccessPayment';
 import { CreatorCampagnes } from './Pages/CreatorCampagnes';
 import { Orders } from './Pages/Orders';
 import { AdminOrders } from './Pages/AdminOrders';
+import { AdminOrderDetails } from './Pages/AdminOrderDetails';
 
 function Main() {
     const { isAuthenticated, userRole } = useAuth();
@@ -48,6 +49,7 @@ function Main() {
                     {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/campagne/overview" element={<AdminCampagneOverview />} /> : <Route exact path="/admin/campagne/overview" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/campagne/details/:id" element={<AdminCampagneDetails />} /> : <Route exact path="/admin/campagne/overview" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/ecommerce/order" element={<AdminOrders />} /> : <Route exact path="/admin/ecommerce/order" element={<Navigate to="/login" />} />}
+                    {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/order/details/:id" element={<AdminOrderDetails />} /> : <Route exact path="/admin/order/details/:id" element={<Navigate to="/login" />} />}
                 </Routes>
             </Router>
         </ErrorBoundary>

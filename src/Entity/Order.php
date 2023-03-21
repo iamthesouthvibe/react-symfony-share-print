@@ -65,6 +65,15 @@ class Order
     #[ORM\Column]
     private ?bool $isSend = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $taxAmount = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $deliveryPrice = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $priceHt = null;
+
     public function __construct()
     {
         $this->campagneOrders = new ArrayCollection();
@@ -281,6 +290,42 @@ class Order
     public function setIsSend(bool $isSend): self
     {
         $this->isSend = $isSend;
+
+        return $this;
+    }
+
+    public function getTaxAmount(): ?float
+    {
+        return $this->taxAmount;
+    }
+
+    public function setTaxAmount(?float $taxAmount): self
+    {
+        $this->taxAmount = $taxAmount;
+
+        return $this;
+    }
+
+    public function getDeliveryPrice(): ?float
+    {
+        return $this->deliveryPrice;
+    }
+
+    public function setDeliveryPrice(?float $deliveryPrice): self
+    {
+        $this->deliveryPrice = $deliveryPrice;
+
+        return $this;
+    }
+
+    public function getPriceHt(): ?float
+    {
+        return $this->priceHt;
+    }
+
+    public function setPriceHt(?float $priceHt): self
+    {
+        $this->priceHt = $priceHt;
 
         return $this;
     }

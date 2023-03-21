@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Document</title>
+		<style>
+			body {
+				font-family: sans-serif;
+				margin: 10px;
+			}
+
+			h1,
+			h2,
+			h3,
+			p {
+				margin: 0
+			}
+
+			table {
+				width: 100%;
+				margin-bottom: 15px;
+				border: solid 0.5px #000;
+			}
+
+			table tbody tr td:first-child {
+				width: 65%;
+			}
+
+			th {
+				text-align: left;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Commandes à imprimer</h1>
+		<h2>SharePrint</h2>
+		<h3>{{ "now"|date("m/d/Y") }}</h3>
+		<br>
+		{% for order in orders %}
+			<table>
+				<thead>
+					<tr>
+						<th>N :
+							{{ order.id }}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for campagneOrder in order.campagneOrders %}
+						<tr>
+							<td>{{ campagneOrder.campagne.fileSource }}.pdf</td>
+							<td>{{ campagneOrder.campagne.size.name }}</td>
+							<td>{{ campagneOrder.campagne.weight.weight }}GR</td>
+							<td>{{ campagneOrder.campagne.paper.name }}</td>
+							<td>{{ campagneOrder.quantity }}</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% endfor %}
+	</body>
+</html>
