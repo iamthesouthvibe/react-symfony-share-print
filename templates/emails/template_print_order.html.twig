@@ -9,7 +9,7 @@
 			body {
 				font-family: sans-serif;
 				margin: 10px;
-			}
+				color: #000, }
 
 			h1,
 			h2,
@@ -22,10 +22,17 @@
 				width: 100%;
 				margin-bottom: 15px;
 				border: solid 0.5px #000;
+				color: #000000;
+				font-weight: 600;
 			}
 
 			table tbody tr td:first-child {
 				width: 65%;
+			}
+
+			table tbody tr td {
+				color: #000000;
+				font-weight: 600;
 			}
 
 			th {
@@ -38,6 +45,22 @@
 		<h2>SharePrint</h2>
 		<h3>{{ "now"|date("m/d/Y") }}</h3>
 		<br>
+		<table>
+			<tbody>
+				{% for orderList in ordersList %}
+					<tr>
+						{# <h2>{{ orderList.file_source }}</h2> #}
+						<td>{{ orderList.file_source }}.pdf</td>
+						<td>{{ orderList.size }}</td>
+						<td>{{ orderList.style }}</td>
+						<td>{{ orderList.weights }}GR</td>
+						<td>{{ orderList.total_quantity }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<br><br>
+		<h2>Récapitulatif des commandes</h2>
 		{% for order in orders %}
 			<table>
 				<thead>

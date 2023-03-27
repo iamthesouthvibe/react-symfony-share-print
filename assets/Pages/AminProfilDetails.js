@@ -10,7 +10,7 @@ const AminProfilDetails = () => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        axios.get(`/api/user/detail/${id}`, {
+        axios.get(`/api/admin/user/detail/${id}`, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },

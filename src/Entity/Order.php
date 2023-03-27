@@ -74,6 +74,9 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?float $priceHt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $printAt = null;
+
     public function __construct()
     {
         $this->campagneOrders = new ArrayCollection();
@@ -326,6 +329,18 @@ class Order
     public function setPriceHt(?float $priceHt): self
     {
         $this->priceHt = $priceHt;
+
+        return $this;
+    }
+
+    public function getPrintAt(): ?\DateTimeImmutable
+    {
+        return $this->printAt;
+    }
+
+    public function setPrintAt(?\DateTimeImmutable $printAt): self
+    {
+        $this->printAt = $printAt;
 
         return $this;
     }

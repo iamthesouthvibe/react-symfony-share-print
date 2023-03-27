@@ -19,7 +19,7 @@ const CampagnesList = () => {
 
     /** TRAITEMENTS */
     const fetchData = async () => {
-        axios.get(`/api/list/campagnes`, {
+        axios.get(`/api/admin/list/campagnes`, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },

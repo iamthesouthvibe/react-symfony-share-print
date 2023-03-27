@@ -20,7 +20,7 @@ const UsersList = () => {
 
     /** TRAITEMENTS */
     const fetchData = async () => {
-        axios.get(`/api/list/users`, {
+        axios.get(`/api/admin/list/users`, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },
@@ -87,7 +87,7 @@ const UsersList = () => {
         })
             .then((confirmation) => {
                 if (confirmation.value) {
-                    axios.get(`/api/user/delete/${dataId}`, {
+                    axios.get(`/api/admin/user/delete/${dataId}`, {
                         headers: {
                             'Authorization': 'Bearer ' + localStorage.getItem('token'),
                         },
@@ -156,7 +156,7 @@ const UsersList = () => {
         formData.append("password", password)
         formData.append("role", role)
 
-        axios.post(`/api/add/user/${id}`, formData, {
+        axios.post(`/api/admin/add/user/${id}`, formData, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },
@@ -225,7 +225,7 @@ const UsersList = () => {
         formData.append("content", content)
         formData.append("object", object)
 
-        axios.post(`/api/user/send/email/${iduser}`, formData, {
+        axios.post(`/api/admin/user/send/email/${iduser}`, formData, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },

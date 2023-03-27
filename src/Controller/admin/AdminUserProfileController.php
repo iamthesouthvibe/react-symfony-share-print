@@ -2,21 +2,21 @@
 
 namespace App\Controller\admin;
 
-use App\Entity\User;
 use App\Entity\CreatorProfil;
-use App\Services\LogServices;
+use App\Entity\User;
 use App\Services\EmailService;
+use App\Services\LogServices;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 class AdminUserProfileController extends AbstractController
 {
-    #[Route('/api/list/users', name: 'app_list_user')]
+    #[Route('/api/admin/list/users', name: 'app_list_user')]
     public function getUserList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
         $token = $request->headers->get('Authorization');
@@ -36,8 +36,6 @@ class AdminUserProfileController extends AbstractController
         $data = [];
         $dataLogs = [];
 
-        
-
         foreach ($users as $user) {
             $createdAt = ($user->getCreatedAt() !== null) ? $user->getCreatedAt()->format('Y-m-d') : '';
             $updatedAt = ($user->getUpdatedAt() !== null) ? $user->getUpdatedAt()->format('Y-m-d') : '';
@@ -51,25 +49,23 @@ class AdminUserProfileController extends AbstractController
                'updatedAt' => $updatedAt,
            ];
 
-           $userLogs = $user->getUserLogs();
-           if ($userLogs !== NULL) {
-               foreach ($userLogs as $userLog) {
-                $dataLogs[] = [
+            $userLogs = $user->getUserLogs();
+            if ($userLogs !== null) {
+                foreach ($userLogs as $userLog) {
+                    $dataLogs[] = [
                     'userId' => $userLog->getUser()->getId(),
-                    'logId'  =>$userLog->getId(),
-                    'message'  =>$userLog->getMessage(),
-                    'code'  =>$userLog->getCode(),
+                    'logId' => $userLog->getId(),
+                    'message' => $userLog->getMessage(),
+                    'code' => $userLog->getCode(),
                 ];
-               }
-            
-           }
+                }
+            }
         }
-        
 
         return new JsonResponse(['users' => $data, 'logs' => array_reverse($dataLogs)]);
     }
 
-    #[Route('/api/user/detail/{id}', name: 'app_details_user')]
+    #[Route('/api/admin/user/detail/{id}', name: 'app_details_user')]
     public function details(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request)
     {
         $token = $request->headers->get('Authorization');
@@ -136,7 +132,7 @@ class AdminUserProfileController extends AbstractController
         ], $data));
     }
 
-    #[Route('/api/user/delete/{id}', name: 'app_delete_user')]
+    #[Route('/api/admin/user/delete/{id}', name: 'app_delete_user')]
     public function deleteUser(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $LogServices)
     {
         $token = $request->headers->get('Authorization');
@@ -162,14 +158,14 @@ class AdminUserProfileController extends AbstractController
             return new JsonResponse(['error' => 'Aucun utilisateur trouvé avec l\'ID "%s".', $id]);
         }
 
-        $LogServices->createLog($curuser, $curuser->getEmail() .' a supprimé l\'utilisateur ID : ' . $user->getId() , 'USER');
+        $LogServices->createLog($curuser, $curuser->getEmail().' a supprimé l\'utilisateur ID : '.$user->getId(), 'USER');
         $em->remove($user);
         $em->flush();
 
         return new JsonResponse(['success' => 'L\'utilisateur a bien été supprimé !']);
     }
 
-    #[Route('/api/add/user/{id}', name: 'app_add_user')]
+    #[Route('/api/admin/add/user/{id}', name: 'app_add_user')]
     public function register(EntityManagerInterface $em, $id = null, UserPasswordHasherInterface $passwordHasher, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $LogServices)
     {
         $token = $request->headers->get('Authorization');
@@ -180,20 +176,20 @@ class AdminUserProfileController extends AbstractController
         } catch (JWTDecodeFailureException $e) {
             return new JsonResponse(['error' => 'Token is invalid']);
         }
-        
+
         $curuser = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
 
         if (!$curuser) {
             return new JsonResponse(['error' => 'User not found'], 404);
         }
 
-        if ($id !== NULL) {
+        if ($id !== null) {
             $user = $em->getRepository(User::class)->findOneBy(['id' => $id]);
-        } 
-        if ($user == NULL) {
-            $user =  new User();
         }
-       
+        if ($user == null) {
+            $user = new User();
+        }
+
         // Vérification de l'existence de l'utilisateur
         if ($user->getEmail() !== null && $user->getEmail() !== $request->request->get('email')) {
             $existingUser = $em->getRepository(User::class)->findOneBy(['email' => $request->request->get('email')]);
@@ -211,22 +207,21 @@ class AdminUserProfileController extends AbstractController
         } elseif ($request->request->get('role') == 'ROLE_CREATOR') {
             $user->setRoles(['ROLE_USER', 'ROLE_CREATOR']);
 
-            if ($user->getCreatorProfil() == NULL) {
+            if ($user->getCreatorProfil() == null) {
                 $creator = new CreatorProfil();
                 $creator->setUser($user);
                 $em->persist($creator);
             }
-            
         } elseif ($request->request->get('role') == 'ROLE_ADMIN') {
             $user->setRoles(['ROLE_USER', 'ROLE_CREATOR', 'ROLE_ADMIN']);
         }
 
-        if ($user->getCreatedAt() == NULL ) {
+        if ($user->getCreatedAt() == null) {
             $user->setCreatedAt(new \DateTimeImmutable());
         } else {
             $user->setUpdatedAt(new \DateTimeImmutable());
         }
-       
+
         if ($request->request->get('password') !== '') {
             $hashedPassword = $passwordHasher->hashPassword(
                 $user,
@@ -234,18 +229,17 @@ class AdminUserProfileController extends AbstractController
             );
             $user->setPassword($hashedPassword);
         }
-        
 
         $em->persist($user);
         $em->flush();
 
-        $LogServices->createLog($curuser, $curuser->getEmail() .' a ajouté l\'utilisateur ID : ' . $user->getId() , 'USER');
+        $LogServices->createLog($curuser, $curuser->getEmail().' a ajouté l\'utilisateur ID : '.$user->getId(), 'USER');
 
         // Envoi d'une réponse de succès
         return new JsonResponse(['message' => 'User created successfully'], 201);
     }
 
-    #[Route('/api/user/send/email/{id}', name: 'app_send_email_user')]
+    #[Route('/api/admin/user/send/email/{id}', name: 'app_send_email_user')]
     public function sendEmail(EntityManagerInterface $em, $id = null, UserPasswordHasherInterface $passwordHasher, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $LogServices, EmailService $emailService)
     {
         $token = $request->headers->get('Authorization');
@@ -256,7 +250,7 @@ class AdminUserProfileController extends AbstractController
         } catch (JWTDecodeFailureException $e) {
             return new JsonResponse(['error' => 'Token is invalid']);
         }
-        
+
         $curuser = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
 
         if (!$curuser) {
@@ -266,17 +260,17 @@ class AdminUserProfileController extends AbstractController
         $user = $em->getRepository(User::class)->findOneBy(['id' => $id]);
 
         $emailService->sendEmail(
-            'emails/template.html.twig', 
+            'emails/template.html.twig',
             [
-                'firstName' => $user->getFirstName() ?? '', 
+                'firstName' => $user->getFirstName() ?? '',
                 'lastName' => $user->getLastName() ?? '',
-                'message' => $request->request->get('content')
-            ], 
+                'message' => $request->request->get('content'),
+            ],
             $user->getEmail(),
             $request->request->get('object')
         );
 
-        $LogServices->createLog($curuser, $curuser->getEmail() .' a ajouté envoyé un mail à l\'utilisateur ID : ' . $user->getId() , 'USER');
+        $LogServices->createLog($curuser, $curuser->getEmail().' a ajouté envoyé un mail à l\'utilisateur ID : '.$user->getId(), 'USER');
 
         // Envoi d'une réponse de succès
         return new JsonResponse(['message' => 'Email send successfully'], 201);

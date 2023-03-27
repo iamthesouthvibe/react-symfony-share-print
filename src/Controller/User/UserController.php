@@ -2,16 +2,16 @@
 
 namespace App\Controller\User;
 
-use App\Entity\User;
 use App\Entity\Address;
+use App\Entity\User;
 use App\Services\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends AbstractController
 {
@@ -23,11 +23,11 @@ class UserController extends AbstractController
      * @param EntityManagerInterface $em
      * @param JWTEncoderInterface    $jwtEncoder
      * @param Request                $request
-     * La fonction vérifie tout d'abord la validité du jeton en le décodant, et renvoie une réponse JSON contenant
-     * une erreur si le jeton est invalide. Sinon, elle utilise l'EntityManager et renvoie un tableau de données de l'utilisateur
+     *                                           La fonction vérifie tout d'abord la validité du jeton en le décodant, et renvoie une réponse JSON contenant
+     *                                           une erreur si le jeton est invalide. Sinon, elle utilise l'EntityManager et renvoie un tableau de données de l'utilisateur
      *
      * @return JsonResponse
-    */
+     */
     #[Route('/api/user', name: 'app_user')]
     public function getCurrentUser(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -66,14 +66,17 @@ class UserController extends AbstractController
         return new JsonResponse($userData);
     }
 
-    /** Cette fonction utilise ensuite les données envoyées dans la requête pour mettre à jour les informations de profil de l'utilisateur, 
-     * puis enregistre les modifications en utilisant l'EntityManager et renvoie une réponse JSON de succès
+    /** Cette fonction utilise ensuite les données envoyées dans la requête pour mettre à jour les informations de profil de l'utilisateur,
+     * puis enregistre les modifications en utilisant l'EntityManager et renvoie une réponse JSON de succès.
+     *
      * @Route("/api/account/update", name="app_user_update")
+     *
      * @param EntityManagerInterface $em
      * @param JWTEncoderInterface    $jwtEncoder
      * @param RequestStack           $requestStack
+     *
      * @return JsonResponse
-    */
+     */
     #[Route('/api/account/update', name: 'app_user_update')]
     public function updateUserProfie(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -105,7 +108,7 @@ class UserController extends AbstractController
             $address->setZip($request->request->get('zip'));
 
             $user->setAddress($address);
-            $user->setUpdatedAt(new \DateTimeImmutable);
+            $user->setUpdatedAt(new \DateTimeImmutable());
         } catch (JWTDecodeFailureException $e) {
             return new JsonResponse(['error' => 'Error form'], 401);
         }
@@ -118,14 +121,16 @@ class UserController extends AbstractController
         return new JsonResponse(['message' => 'User modified successfully'], 201);
     }
 
-    /** Cette fonction utilise ensuite les données envoyées dans la requête pour mettre à jour le mot de passe de l'utilisateur, 
+    /** Cette fonction utilise ensuite les données envoyées dans la requête pour mettre à jour le mot de passe de l'utilisateur,.
      * @Route("/api/account/change_password", name="app_user_change_password")
-     * @param EntityManagerInterface $em
-     * @param JWTEncoderInterface $jwtEncoder
-     * @param RequestStack $requestStack
+     *
+     * @param EntityManagerInterface      $em
+     * @param JWTEncoderInterface         $jwtEncoder
+     * @param RequestStack                $requestStack
      * @param UserPasswordHasherInterface $passwordHasher
+     *
      * @return JsonResponse
-    */
+     */
     #[Route('/api/account/change_password', name: 'app_user_change_password')]
     public function UserProfieChangePassword(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request, UserPasswordHasherInterface $passwordHasher, EmailService $emailService)
     {
@@ -153,14 +158,13 @@ class UserController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        
         $emailService->sendEmail(
-            'emails/template.html.twig', 
+            'emails/template.html.twig',
             [
-                'firstName' => $user->getFirstName() ?? '', 
+                'firstName' => $user->getFirstName() ?? '',
                 'lastName' => $user->getLastName() ?? '',
-                'message' => 'Votre mot de passe a été modifié avec succés'
-            ], 
+                'message' => 'Votre mot de passe a été modifié avec succés',
+            ],
             $user->getEmail(),
             'Changement de mot de passe'
         );
@@ -169,13 +173,15 @@ class UserController extends AbstractController
         return new JsonResponse(['message' => 'Password modified successfully'], 201);
     }
 
-    /** Cette fonction est utilisée pour récupérer le profil d'un créateur d'utilisateur. , 
+    /** Cette fonction est utilisée pour récupérer le profil d'un créateur d'utilisateur. ,.
      * @Route("/api/account/creator/profile", name="app_creator_account")
+     *
      * @param EntityManagerInterface $em
-     * @param JWTEncoderInterface $jwtEncoder
-     * @param Request $request
+     * @param JWTEncoderInterface    $jwtEncoder
+     * @param Request                $request
+     *
      * @return JsonResponse
-    */
+     */
     #[Route('/api/account/creator/profile', name: 'app_creator_account')]
     public function creatorProfile(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -218,14 +224,17 @@ class UserController extends AbstractController
         return new JsonResponse($userData);
     }
 
-    /** Cette fonction utilise ensuite les données envoyées dans la requête pour mettre à jour les informations de profil d'un créateur, 
-     * puis enregistre les modifications en utilisant l'EntityManager et renvoie une réponse JSON de succès
+    /** Cette fonction utilise ensuite les données envoyées dans la requête pour mettre à jour les informations de profil d'un créateur,
+     * puis enregistre les modifications en utilisant l'EntityManager et renvoie une réponse JSON de succès.
+     *
      * @Route("/api/account/creator/update", name="app_creator_update")
+     *
      * @param EntityManagerInterface $em
      * @param JWTEncoderInterface    $jwtEncoder
      * @param RequestStack           $requestStack
+     *
      * @return JsonResponse
-    */
+     */
     #[Route('/api/account/creator/update', name: 'app_creator_update')]
     public function updateCreatorProfie(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -255,10 +264,10 @@ class UserController extends AbstractController
             $creatorProfil->setInstagram($request->request->get('instagram'));
             $creatorProfil->setLinkedin($request->request->get('linkedin'));
             $creatorProfil->setBehance($request->request->get('behance'));
-            $creatorProfil->setDribble($request->request->get('dribble')); 
+            $creatorProfil->setDribble($request->request->get('dribble'));
 
             $creatorProfil->setUser($user);
-            $user->setUpdatedAt(new \DateTimeImmutable);
+            $user->setUpdatedAt(new \DateTimeImmutable());
         } catch (JWTDecodeFailureException $e) {
             return new JsonResponse(['error' => 'Error form'], 401);
         }
@@ -270,14 +279,17 @@ class UserController extends AbstractController
         return new JsonResponse(['message' => 'Creator modified successfully'], 201);
     }
 
-    /** Cette fonction utilise ensuite les données envoyées dans la requête pour mettre à jour les informations de settings d'un créateur, 
-     * puis enregistre les modifications en utilisant l'EntityManager et renvoie une réponse JSON de succès
-     * @Route("/api/account/creator/settings/update", name="app_creator_settings_update")
+    /** Cette fonction utilise ensuite les données envoyées dans la requête pour mettre à jour les informations de settings d'un créateur,
+     * puis enregistre les modifications en utilisant l'EntityManager et renvoie une réponse JSON de succès.
+     *
+     * @Route("/api/account/creator/settings/update", name="app_creator_settings_update"
+     *
      * @param EntityManagerInterface $em
      * @param JWTEncoderInterface    $jwtEncoder
      * @param RequestStack           $requestStack
+     *
      * @return JsonResponse
-    */
+     */
     #[Route('/api/account/creator/settings/update', name: 'app_creator_settings_update')]
     public function updateCreatorSettings(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -307,12 +319,12 @@ class UserController extends AbstractController
             $creatorProfil->setPayoutOrganisation($request->request->get('organisation'));
             $creatorProfil->setInvoiceAddress($request->request->get('address'));
             $creatorProfil->setInvoiceCity($request->request->get('city'));
-            $creatorProfil->setInvoiceCountry($request->request->get('country')); 
-            $creatorProfil->setInvoiceZip($request->request->get('zip')); 
-            $creatorProfil->setPaypalEmail($request->request->get('paypalEmail')); 
+            $creatorProfil->setInvoiceCountry($request->request->get('country'));
+            $creatorProfil->setInvoiceZip($request->request->get('zip'));
+            $creatorProfil->setPaypalEmail($request->request->get('paypalEmail'));
 
             $creatorProfil->setUser($user);
-            $user->setUpdatedAt(new \DateTimeImmutable);
+            $user->setUpdatedAt(new \DateTimeImmutable());
         } catch (JWTDecodeFailureException $e) {
             return new JsonResponse(['error' => 'Error form'], 401);
         }

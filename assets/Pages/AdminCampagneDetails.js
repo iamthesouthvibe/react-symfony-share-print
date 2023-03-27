@@ -15,7 +15,7 @@ const AdminCampagneDetails = () => {
     ];
 
     useEffect(() => {
-        axios.get(`/api/campagne/detail/${id}`, {
+        axios.get(`/api/admin/campagne/detail/${id}`, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },

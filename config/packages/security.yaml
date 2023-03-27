@@ -38,13 +38,41 @@ security:
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
+    # role hierarchy
+    role_hierarchy:
+        ROLE_USER: ROLE_USER
+        ROLE_ADMIN: ROLE_ADMIN
+        ROLE_CREATOR: ROLE_CREATOR
     access_control:
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api/user, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/api/account/update, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/api/account/change_password, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/api/account/creator/profile, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/campagne/add, roles: PUBLIC_ACCESS }
+        - { path: ^/api/card/checkout, roles: PUBLIC_ACCESS }
+        - { path: ^/checkout, roles: PUBLIC_ACCESS }
+        - { path: ^/api/success_payment', roles: PUBLIC_ACCESS }
+        - { path: ^/api/list/shop', roles: PUBLIC_ACCESS }
+        - { path: ^/api/shop/product/details', roles: PUBLIC_ACCESS }
+        - { path: ^/api/user, roles: ROLE_USER }
+        - { path: ^/api/account/update, roles: ROLE_USER }
+        - { path: ^/api/account/change_password, roles: ROLE_USER }
+        - { path: ^/api/order/list, roles: ROLE_USER }
+        - { path: ^/api/account/creator/profile, roles: ROLE_CREATOR }
+        - { path: ^/api/account/creator/update, roles: ROLE_CREATOR }
+        - { path: ^/api/account/campagne/list, roles: ROLE_CREATOR }
+        - { path: ^/api/account/creator/settings/update', roles: ROLE_CREATOR }
+        - { path: ^/api/admin/order/print, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/order/list, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/order/detail, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/list/campagnes, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/campagne/download, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/campagne/detail, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/campagne/reject, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/list/users, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/user/detail, roles: ROLE_ADMIN }''
+        - { path: ^/api/admin/user/delete, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/add/user, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/user/send/email, roles: ROLE_ADMIN }
+
 
 when@test:
     security:

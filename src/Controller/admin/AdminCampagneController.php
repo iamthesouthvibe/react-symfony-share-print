@@ -18,7 +18,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 class AdminCampagneController extends AbstractController
 {
-    #[Route('/api/list/campagnes', name: 'app_list_campagnes')]
+    #[Route('/api/admin/list/campagnes', name: 'app_list_campagnes')]
     public function getCampagnesList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
         $token = $request->headers->get('Authorization');
@@ -136,7 +136,7 @@ class AdminCampagneController extends AbstractController
         }
     }
 
-    #[Route('/api/campagne/detail/{id}', name: 'app_details_campagne')]
+    #[Route('/api/admin/campagne/detail/{id}', name: 'app_details_campagne')]
     public function details(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $logServices)
     {
         $token = $request->headers->get('Authorization');

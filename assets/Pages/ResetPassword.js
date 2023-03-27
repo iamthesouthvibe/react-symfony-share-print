@@ -1,34 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import Layout from '../components/Layout';
 import Swal from 'sweetalert2';
-import { Link } from 'react-router-dom';
 
-function Login() {
-    const [email, setEmail] = useState('');
+export const ResetPassword = () => {
+
+    const { token } = useParams();
     const [password, setPassword] = useState('');
     const [isSaving, setIsSaving] = useState(false);
-    const [token, setToken] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSaving(true);
         let formData = new FormData();
-        formData.append("email", email);
         formData.append("password", password);
 
-        axios.post('/api/login', formData)
+        axios.post(`/api/resetpassword/${token}`, formData)
             .then((response) => {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Vous etes connecté',
+                    title: response.data.message,
                     showConfirmButton: false,
                     timer: 1500
                 })
-                setToken(response.data.token);
-                localStorage.setItem('token', response.data.token);
                 setIsSaving(false);
-                setEmail('');
                 setPassword('');
 
                 setTimeout(function () {
@@ -38,7 +33,7 @@ function Login() {
             .catch((error) => {
                 Swal.fire({
                     icon: 'error',
-                    title: error.response.data.error,
+                    title: error.data.message,
                     showConfirmButton: false,
                     timer: 2500
                 })
@@ -47,23 +42,15 @@ function Login() {
     };
 
     return (
-        <Layout>
+        <div>
             <form onSubmit={handleSubmit}>
                 <label>
-                    email:
-                <input type="text" value={email} onChange={e => setEmail(e.target.value)} />
-                </label>
-                <br />
-                <label>
-                    Password:
+                    New Password:
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
                 </label>
                 <br />
-                <button type="submit">Login</button>
+                <button type="submit">submit</button>
             </form>
-            <Link to="/change_password">Forget password ?</Link>
-        </Layout>
-    );
+        </div>
+    )
 }
-
-export default Login;

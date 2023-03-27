@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     campagnes_dir: "%kernel.project_dir%/public/images/campagnes"
+    print_dir: "%kernel.project_dir%/public/images/print"
 
 services:
     # default configuration for services in *this* file
@@ -19,7 +20,7 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
-            - '../src/Kernel.php'
+            - '../src/Kernel.php'''
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

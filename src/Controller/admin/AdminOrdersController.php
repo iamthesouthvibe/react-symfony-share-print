@@ -4,12 +4,13 @@ namespace App\Controller\admin;
 
 use App\Entity\Order;
 use App\Entity\User;
+use App\Services\PdfService;
 use Doctrine\ORM\EntityManagerInterface;
-use Knp\Snappy\Pdf;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AdminOrdersController extends AbstractController
@@ -117,24 +118,57 @@ class AdminOrdersController extends AbstractController
         return new JsonResponse(['order' => $data]);
     }
 
-    #[Route('/api/admin/order/print/', name: 'app_admin_print_order')]
-    public function generatePrintPDF(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request, Pdf $pdf)
+    #[Route('/api/admin/order/print', name: 'app_admin_print_order')]
+    public function generatePrintPDF(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request, PdfService $pdf)
     {
+        $token = $request->headers->get('Authorization');
+        $token = str_replace('Bearer ', '', $token);
+
+        try {
+            $data = $jwtEncoder->decode($token);
+        } catch (JWTDecodeFailureException $e) {
+            return new JsonResponse(['error' => 'Token is invalid']);
+        }
+
         $orders = $em->getRepository(Order::class)->findBy(['status' => 'paid', 'isSend' => false, 'isPrint' => false], ['id' => 'DESC']);
+
+        $ordersList = $em->getRepository(Order::class)->findOrderByCampagneAndQuantity();
 
         $html = $this->renderView('emails/template_print_order.html.twig', [
             'orders' => $orders,
+            'ordersList' => $ordersList,
         ]);
 
-        echo $html;
-        exit;
+        $response = $pdf->showPdfFile($html);
 
-        $pdfContent = $pdf->getOutputFromHtml($html);
+        $date = date('Y-m-d'); // Récupération de la date du jour au format "année-mois-jour"
+        $unique_id = uniqid(); // Génération d'un identifiant unique
+        $unique_id = substr($unique_id, -5); // Récupération des 5 derniers caractères de l'identifiant unique
 
-        $response = new Response($pdfContent);
-        $response->headers->set('Content-Type', 'application/pdf');
-        $response->headers->set('Content-Disposition', 'attachment; filename="your_file_name.pdf"');
+        $filename = $date.'_'.$unique_id.'.pdf';
+        $pdf->savePdfFile($html, $this->getParameter('print_dir'), $filename);
 
-        return $response;
+        return new Response($response);
+    }
+
+    #[Route('/api/admin/order/printstatus/{id}', name: 'app_print_status_campagne')]
+    public function changePrintStatus(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $logServices)
+    {
+        $order = $em
+            ->getRepository(Order::class)
+            ->find($id);
+
+        if (!$order) {
+            return new JsonResponse(['error' => sprintf('Aucune commande trouvée avec l\'ID "%s".', $id)], 404);
+        }
+
+        $order->setPrintAt(new \DateTimeImmutable());
+        $order->setIsPrint(true);
+        $em->persist($order);
+        $em->flush();
+
+        // $logServices->createCampagneLog($campagne, 'Campagne refusée', 'CAMPAGNE_REJECT');
+
+        return new JsonResponse(['success' => 'La commande a été noté comme imprimé']);
     }
 }

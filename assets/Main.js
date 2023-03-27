@@ -22,6 +22,8 @@ import { CreatorCampagnes } from './Pages/CreatorCampagnes';
 import { Orders } from './Pages/Orders';
 import { AdminOrders } from './Pages/AdminOrders';
 import { AdminOrderDetails } from './Pages/AdminOrderDetails';
+import { ChangePassword } from './Pages/ChangePassword';
+import { ResetPassword } from './Pages/ResetPassword';
 
 function Main() {
     const { isAuthenticated, userRole } = useAuth();
@@ -38,6 +40,8 @@ function Main() {
                     <Route exact path="/register" element={<Register />} />
                     <Route exact path="/create_campagne" element={<CampagneCreate />} />
                     <Route exact path="/success_payment" element={<SuccessPayment />} />
+                    <Route exact path="/change_password" element={<ChangePassword />} />
+                    <Route exact path="/reset-password/:token" element={<ResetPassword />} />
                     {isAuthenticated && userRole.includes('ROLE_USER') ? <Route exact path="/account" element={<Account />} /> : <Route exact path="/account" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_USER') ? <Route exact path="/orders" element={<Orders />} /> : <Route exact path="/account" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_CREATOR') ? <Route exact path="/creator_profil" element={<CreatorProfile />} /> : <Route exact path="/creator_profil" element={<Navigate to="/login" />} />}

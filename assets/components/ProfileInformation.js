@@ -44,6 +44,7 @@ function ProfileInformation() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSaving(true);
+        console.log(firstname, email, lastname)
         let formData = new FormData()
         formData.append("email", email)
         formData.append("firstname", firstname)

@@ -3,6 +3,7 @@ import axios from 'axios';
 import ReactPaginate from "react-paginate";
 import iconActions from '../../images/icon-actions.svg';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export const OrdersList = () => {
 
@@ -92,6 +93,41 @@ export const OrdersList = () => {
         setCurrentPage(data.selected + 1);
     };
 
+
+    // Download print 
+    const handleDownloadPrint = () => {
+        Swal.fire({
+            title: "Êtes-vous sûr de vouloir effectuer cette action ?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Oui",
+            cancelButtonText: "annuler ",
+        })
+            .then((confirmation) => {
+                if (confirmation.value) {
+                    axios.get('/api/admin/order/print', {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                            'Accept': "application/pdf"
+                        },
+                        responseType: 'blob',
+                    })
+                        .then(response => {
+                            const blob = new Blob([response.data], { type: 'application/pdf' });
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.setAttribute('download', 'print.pdf');
+                            link.click();
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+                }
+            });
+    };
+
     return (
         <div>
             <div style={styles.filtreContainer}>
@@ -110,6 +146,7 @@ export const OrdersList = () => {
                     <option value="desc">Descending</option>
                     <option value="asc">Ascending</option>
                 </select>
+                <button onClick={handleDownloadPrint}>Print download</button>
             </div>
             <table>
                 <thead>
