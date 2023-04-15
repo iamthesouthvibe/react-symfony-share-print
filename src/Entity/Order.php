@@ -77,9 +77,19 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $printAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $sendAt = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $shipCode = null;
+
+    #[ORM\OneToMany(mappedBy: 'purchase', targetEntity: Shipping::class)]
+    private Collection $shippings;
+
     public function __construct()
     {
         $this->campagneOrders = new ArrayCollection();
+        $this->shippings = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -341,6 +351,60 @@ class Order
     public function setPrintAt(?\DateTimeImmutable $printAt): self
     {
         $this->printAt = $printAt;
+
+        return $this;
+    }
+
+    public function getSendAt(): ?\DateTimeImmutable
+    {
+        return $this->sendAt;
+    }
+
+    public function setSendAt(?\DateTimeImmutable $sendAt): self
+    {
+        $this->sendAt = $sendAt;
+
+        return $this;
+    }
+
+    public function getShipCode(): ?string
+    {
+        return $this->shipCode;
+    }
+
+    public function setShipCode(?string $shipCode): self
+    {
+        $this->shipCode = $shipCode;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Shipping>
+     */
+    public function getShippings(): Collection
+    {
+        return $this->shippings;
+    }
+
+    public function addShipping(Shipping $shipping): self
+    {
+        if (!$this->shippings->contains($shipping)) {
+            $this->shippings->add($shipping);
+            $shipping->setPurchase($this);
+        }
+
+        return $this;
+    }
+
+    public function removeShipping(Shipping $shipping): self
+    {
+        if ($this->shippings->removeElement($shipping)) {
+            // set the owning side to null (unless already changed)
+            if ($shipping->getPurchase() === $this) {
+                $shipping->setPurchase(null);
+            }
+        }
 
         return $this;
     }

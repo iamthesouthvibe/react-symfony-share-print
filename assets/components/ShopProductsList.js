@@ -99,6 +99,8 @@ const ShopProductsList = () => {
     };
 
 
+    const [cartItemsCount, setCartItemsCount] = useState(0);
+
     // Ajoute un produit dans le localStorage
     const addToCart = (campagne) => {
         let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
@@ -119,6 +121,9 @@ const ShopProductsList = () => {
         }
 
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
+
+
+        setCartItemsCount(cartItems.length);
     };
 
     return (

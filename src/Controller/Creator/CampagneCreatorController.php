@@ -4,6 +4,7 @@ namespace App\Controller\Creator;
 
 use App\Entity\Campagne;
 use App\Entity\CampagneStatus;
+use App\Entity\CreatorProfil;
 use App\Entity\PaperSize;
 use App\Entity\PaperStyle;
 use App\Entity\PaperWeight;
@@ -32,13 +33,13 @@ class CampagneCreatorController extends AbstractController
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'You should to be connect for post campagne']);
+            return new JsonResponse(['error' => 'You should to be connect for post campagne'], 401);
         }
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
 
         if (!$user) {
-            return new JsonResponse(['error' => 'You should to be connect for post campagne']);
+            return new JsonResponse(['error' => 'You should to be connect for post campagne'], 401);
         }
 
         /* TRAITEMENTS */
@@ -71,7 +72,7 @@ class CampagneCreatorController extends AbstractController
                     $newFilenamePdf
                 );
             } catch (FileException $e) {
-                var_dump($e);
+                return new JsonResponse(['error' => 'Error'], 500);
             }
 
             $campagne->setFileSource($newFilename);
@@ -109,13 +110,32 @@ class CampagneCreatorController extends AbstractController
             $size = $em->getRepository(PaperSize::class)->findOneBy(['name' => $request->request->get('size')], []);
             $campagne->setSize($size);
 
+            if ($request->request->get('weight') == '130') {
+                if ($request->request->get('size') == 'A2') {
+                    $pricePrint = 6;
+                } elseif ($request->request->get('size') == 'A3') {
+                    $pricePrint = 4;
+                } else {
+                    $pricePrint = 2.50;
+                }
+            } elseif ($request->request->get('weight') == '160') {
+                if ($request->request->get('size') == 'A2') {
+                    $pricePrint = 8;
+                } elseif ($request->request->get('size') == 'A3') {
+                    $pricePrint = 4;
+                } else {
+                    $pricePrint = 2.50;
+                }
+            }
+
+            $campagne->setPricePrint($pricePrint);
             $campagne->setNameProject($request->request->get('projectName'));
             $campagne->setPrice($request->request->get('price'));
             $campagne->setDescription($request->request->get('description'));
             $campagne->setTotalTax($request->request->get('totalTax'));
-            $campagne->setPriceAti($request->request->get('totalPrice'));
+            $campagne->setPriceAti($request->request->get('totalPrice') + $pricePrint);
             $campagne->setStatus($em->getRepository(CampagneStatus::class)->findOneBy(['id' => 1], []));
-
+            $campane->isBest(false);
             $campagne->setUser($user);
             $campagne->setCreatedAt(new \DateTimeImmutable());
             $user->setRoles(['ROLE_CREATOR', 'ROLE_USER']);
@@ -125,7 +145,7 @@ class CampagneCreatorController extends AbstractController
 
             // $user->setAddress($address);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Error form'], 401);
+            return new JsonResponse(['error' => 'Error form'], 400);
         }
 
         // Log
@@ -200,5 +220,46 @@ class CampagneCreatorController extends AbstractController
         }
 
         return new JsonResponse(['campagnes' => array_reverse($data)]);
+    }
+
+    #[Route('/api/creator/detail/{id}', name: 'app_creator_detail')]
+    public function getCreatorDetail(EntityManagerInterface $em, string $id, Request $request)
+    {
+        $creator = $em->getRepository(CreatorProfil::class)->find($id);
+
+        $campagnes = $creator->getUser()->getCampagnes();
+
+        $campagnesData = [];
+        foreach ($campagnes as $c) {
+            $campagnesData[] = [
+                    'id' => $c->getId(),
+                    'userid' => $c->getUser()->getId(),
+                    'nameproject' => $c->getNameProject(),
+                    'slug' => $c->getSlug(),
+                    'status' => $c->getStatus()->getLibelle(),
+                    'fileSource' => $c->getFileSource().'.png',
+                    'filename' => $c->getFileSource(),
+                    'price' => $c->getPriceAti(),
+                ];
+        }
+        // Filtrer les campagnes en fonction du statut
+        $enCoursCampagnes = array_filter($campagnesData, function ($c) {
+            return $c['status'] === 'En cours';
+        });
+
+        $name = ($creator->getDisplayName() !== null) ? $creator->getDisplayName() : $creator->getUser()->getFirstName().' '.$creator->getUser()->getLastName();
+        $data = [
+            'id' => $creator->getId(),
+            'fileSource' => $creator->getFilename(),
+            'name' => $name,
+            'bio' => $creator->getBio() ?? '',
+            'instagram' => $creator->getInstagram() ?? '',
+            'linkedin' => $creator->getLinkedin() ?? '',
+            'dribble' => $creator->getDribble() ?? '',
+            'behance' => $creator->getBehance() ?? '',
+            'campagnes' => array_reverse($enCoursCampagnes),
+         ];
+
+        return new JsonResponse(['creator' => array_reverse($data)]);
     }
 }

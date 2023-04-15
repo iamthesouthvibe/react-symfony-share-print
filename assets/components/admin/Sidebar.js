@@ -19,6 +19,9 @@ const Sidebar = () => {
             <div style={styles.navbar__header}>
                 <h5 style={styles.navbar__header_name}>Léo Labeaume</h5>
             </div>
+            <div>
+                <Link>Dashboard</Link>
+            </div>
             <div style={styles.navbar__accordion}>
                 <div style={styles.navbar__accordion_action} onClick={handleOpen}>
                     <img src={arrowRright} style={open ? styles.navbar__accordion_action_img1_open : styles.navbar__accordion_action_img1} />
@@ -45,6 +48,20 @@ const Sidebar = () => {
                             <Link to="/admin/campagne/overview" style={styles.navbar__list_item_link}>Campagnes</Link>
 
                             <Link to="/admin/ecommerce/order" style={styles.navbar__list_item_link}>Orders</Link>
+                        </div>
+                    </>
+                )}
+            </div>
+            <div style={styles.navbar__accordion}>
+                <div style={styles.navbar__accordion_action} onClick={handleOpen}>
+                    <img src={arrowRright} style={open ? styles.navbar__accordion_action_img1_open : styles.navbar__accordion_action_img1} />
+                    <img src={iconUser} style={styles.navbar__accordion_action_img2} />
+                    <span>Marketing</span>
+                </div>
+                {open && (
+                    <>
+                        <div style={styles.navbar__list_item}>
+                            <Link to="/admin/marketing/overview" style={styles.navbar__list_item_link}>Lookbook</Link>
                         </div>
                     </>
                 )}

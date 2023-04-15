@@ -131,7 +131,6 @@ const CampagnesList = () => {
                 })
             })
 
-
             .catch(error => {
                 Swal.fire({
                     icon: 'error',
@@ -241,11 +240,14 @@ const CampagnesList = () => {
                             <div style={styles.flexGroup}>
                                 <div>
                                     <h6 style={styles.subtitle}>Price</h6>
-                                    <p style={styles.paragraph}>{campagne.price}</p>
+                                    <p style={styles.paragraph}>Price HT : {campagne.price}€</p>
+                                    <p style={styles.paragraph}>Price Ati : {campagne.priceAti}€</p>
+                                    <p style={styles.paragraph}>Price print : {campagne.priceAti}€</p>
+                                    <p style={styles.paragraph}>Total tax : {campagne.totalTax}€</p>
                                 </div>
                                 <div>
                                     <h6 style={styles.subtitle}>Days</h6>
-                                    <p style={styles.paragraph}>{30 - campagne.days}</p>
+                                    <p style={styles.paragraph}>{campagne.days}</p>
                                 </div>
                             </div>
                         </div>

@@ -33,7 +33,28 @@ export const OrdersList = () => {
         return <div>Chargement en cours...</div>;
     }
 
-    console.log(orders);
+
+    const [shippingList, setShippingList] = useState([]);
+    const fetchShippingList = async () => {
+        axios.get(`/api/admin/shipping/list`, {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+            },
+        })
+            .then(function (response) {
+                setShippingList(response.data.shippings)
+            })
+            .catch(error => {
+                console.log(error);
+                // localStorage.clear();
+                // window.location.pathname = "/";
+            });
+    }
+    useEffect(() => {
+        fetchShippingList()
+    }, []);
+
+    console.log(shippingList)
 
     // Filter search
     const [search, setSearch] = useState('')
@@ -93,7 +114,6 @@ export const OrdersList = () => {
         setCurrentPage(data.selected + 1);
     };
 
-
     // Download print 
     const handleDownloadPrint = () => {
         Swal.fire({
@@ -116,9 +136,10 @@ export const OrdersList = () => {
                     })
                         .then(response => {
                             const blob = new Blob([response.data], { type: 'application/pdf' });
+                            const filename = getFilenameFromResponseHeader(response);
                             const link = document.createElement('a');
                             link.href = URL.createObjectURL(blob);
-                            link.setAttribute('download', 'print.pdf');
+                            link.setAttribute('download', filename);
                             link.click();
                         })
                         .catch(error => {
@@ -127,6 +148,168 @@ export const OrdersList = () => {
                 }
             });
     };
+
+
+    function getFilenameFromResponseHeader(response) {
+        const contentDispositionHeader = response.headers['content-disposition'];
+        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        const matches = filenameRegex.exec(contentDispositionHeader);
+        if (matches != null && matches[1]) {
+            return matches[1].replace(/['"]/g, '');
+        } else {
+            return 'print.pdf';
+        }
+    }
+
+
+    const handlePrintStatus = (event) => {
+        const element = event.target;
+        const dataId = element.dataset.id;
+
+        Swal.fire({
+            title: "Êtes-vous sûr de vouloir changer le status en imprimé ?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Oui",
+            cancelButtonText: "annuler ",
+        })
+            .then((confirmation) => {
+                if (confirmation.value) {
+                    axios.get(`/api/admin/order/printstatus/${dataId}`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        },
+                    })
+                        .then(function (response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: response.data.success,
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+
+                            fetchData();
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: response.data.error,
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+
+                            fetchData();
+                            console.log(error);
+
+                            // localStorage.clear();
+                            // window.location.pathname = "/";
+                        });
+                }
+            });
+    }
+
+
+    const handleDownloadOrderDelivery = () => {
+        Swal.fire({
+            title: "Êtes-vous sûr de vouloir effectuer cette action ?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Oui",
+            cancelButtonText: "annuler ",
+        })
+            .then((confirmation) => {
+                if (confirmation.value) {
+                    axios.get('/api/admin/print/delivery', {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        },
+                        responseType: 'blob',
+                    })
+                        .then(response => {
+                            const blob = new Blob([response.data]);
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            const disposition = response.headers['content-disposition'];
+                            const match = disposition.match(/filename=(.+)$/);
+                            if (match) {
+                                const filename = match[1];
+                                link.setAttribute('download', filename);
+                            } else {
+                                link.setAttribute('download', 'orders.zip');
+                            }
+                            link.click();
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Aucune commande a expedié',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        });
+                }
+            });
+    };
+
+
+    const [showModal, setShowModal] = useState(false);
+    const handleShowModal = () => {
+        setShowModal(!showModal);
+    };
+
+    const [idshipping, setIdshipping] = useState('');
+    const [idorder, setIdorder] = useState('')
+    const [isSaving, setIsSaving] = useState(false);
+
+
+    const handleShippingStatus = (e) => {
+
+        e.preventDefault();
+        setIsSaving(true);
+        let formData = new FormData()
+
+        console.log(idshipping);
+        formData.append("idshipping", idshipping)
+        axios.post(`/api/admin/order/shippingstatus/${idorder}`, formData, {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+            },
+        })
+            .then(function (response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: response.data.success,
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+                setIsSaving(false);
+                fetchData();
+                setShowModal();
+                setIdshipping('')
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: error.response.data.error,
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+
+                setIsSaving(false);
+                fetchData();
+                setShowModal();
+                setIdshipping('')
+
+                // localStorage.clear();
+                // window.location.pathname = "/";
+            });
+
+    }
+
 
     return (
         <div>
@@ -137,16 +320,20 @@ export const OrdersList = () => {
                     <option value="À imprimer">À imprimer</option>
                     <option value="Imprimé">Imprimé</option>
                 </select>
+
                 <select style={styles.input} onChange={handleStatusPaidChange}>
                     <option value="" selected>Select send status</option>
-                    <option value="À envoyer">À envoyer</option>
-                    <option value="Envoyé">Envoyé</option>
+                    {shippingList.map(shipping => (
+                        <option value={shipping.libelle}>{shipping.libelle}</option>
+                    ))}
                 </select>
+
                 <select onChange={handleSortOrderChange} style={styles.input}>
                     <option value="desc">Descending</option>
                     <option value="asc">Ascending</option>
                 </select>
                 <button onClick={handleDownloadPrint}>Print download</button>
+                <button onClick={handleDownloadOrderDelivery}>Delivery download</button>
             </div>
             <table>
                 <thead>
@@ -157,7 +344,7 @@ export const OrdersList = () => {
                         <th>Total Price</th>
                         <th>Payment status</th>
                         <th>Print status</th>
-                        <th>Send status</th>
+                        <th>Shipping status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -178,6 +365,11 @@ export const OrdersList = () => {
                                 {selectedOrderId === order.id && (
                                     <div className="table__breadcrumb">
                                         <Link to={`/admin/order/details/${order.id}`}>Détails</Link>
+                                        <a data-id={order.id} onClick={(event) => handlePrintStatus(event)}>Commande imprimée</a>
+                                        <a data-id={order.id} onClick={() => {
+                                            setIdorder(order.id);
+                                            handleShowModal();
+                                        }}>Commande expédiée</a>
                                     </div>
                                 )}
                             </td>
@@ -197,7 +389,34 @@ export const OrdersList = () => {
                 containerClassName="pagination"
                 activeClassName="active"
             />
-        </div>
+
+            {
+                showModal && (
+                    <div style={styles.modalContainer}>
+                        <div>
+                            <h3>Vous allez changer le statut de en pris en charge par La Poste, veuillez entrer le l'id shipping </h3>
+                            <form>
+                                <div style={styles.flex}>
+                                    <label>
+                                        Id shipping : <br />
+                                        <input type="text" style={styles.input} value={idshipping} onChange={e => (setIdshipping(e.target.value))} />
+                                    </label>
+                                    <br />
+                                </div>
+                                <br />
+                                <button style={styles.input} onClick={() => {
+                                    setIdorder('');
+                                    setIdshipping('');
+                                    handleShowModal();
+                                }}>Annuler</button>
+                                <button type="submit" style={styles.input} onClick={handleShippingStatus}>Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
+
     )
 
 }

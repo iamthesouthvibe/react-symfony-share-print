@@ -77,6 +77,27 @@ class Campagne
     #[ORM\Column(nullable: true)]
     private ?float $priceAti = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $totalCa = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $totalTaxamount = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $totalBenefCompany = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $totalBenefCreator = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $pricePrint = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $totalPricePrint = null;
+
+    #[ORM\Column]
+    private ?bool $isBest = null;
+
     public function __construct()
     {
         $this->campagneLogs = new ArrayCollection();
@@ -371,6 +392,90 @@ class Campagne
     public function setPriceAti(?float $priceAti): self
     {
         $this->priceAti = $priceAti;
+
+        return $this;
+    }
+
+    public function getTotalCa(): ?float
+    {
+        return $this->totalCa;
+    }
+
+    public function setTotalCa(?float $totalCa): self
+    {
+        $this->totalCa = $totalCa;
+
+        return $this;
+    }
+
+    public function getTotalTaxamount(): ?float
+    {
+        return $this->totalTaxamount;
+    }
+
+    public function setTotalTaxamount(?float $totalTaxamount): self
+    {
+        $this->totalTaxamount = $totalTaxamount;
+
+        return $this;
+    }
+
+    public function getTotalBenefCompany(): ?float
+    {
+        return $this->totalBenefCompany;
+    }
+
+    public function setTotalBenefCompany(?float $totalBenefCompany): self
+    {
+        $this->totalBenefCompany = $totalBenefCompany;
+
+        return $this;
+    }
+
+    public function getTotalBenefCreator(): ?float
+    {
+        return $this->totalBenefCreator;
+    }
+
+    public function setTotalBenefCreator(?float $totalBenefCreator): self
+    {
+        $this->totalBenefCreator = $totalBenefCreator;
+
+        return $this;
+    }
+
+    public function getPricePrint(): ?float
+    {
+        return $this->pricePrint;
+    }
+
+    public function setPricePrint(?float $pricePrint): self
+    {
+        $this->pricePrint = $pricePrint;
+
+        return $this;
+    }
+
+    public function getTotalPricePrint(): ?float
+    {
+        return $this->totalPricePrint;
+    }
+
+    public function setTotalPricePrint(?float $totalPricePrint): self
+    {
+        $this->totalPricePrint = $totalPricePrint;
+
+        return $this;
+    }
+
+    public function isIsBest(): ?bool
+    {
+        return $this->isBest;
+    }
+
+    public function setIsBest(bool $isBest): self
+    {
+        $this->isBest = $isBest;
 
         return $this;
     }

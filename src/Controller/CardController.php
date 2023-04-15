@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Campagne;
 use App\Entity\CampagneOrder;
 use App\Entity\Order;
+use App\Entity\Shipping;
 use App\Entity\User;
 use App\Services\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -54,6 +55,10 @@ class CardController extends AbstractController
         $order->setIsSend(false);
         $order->setTotalPrice($data['totalPrice'] + 6.50);
         $order->setDeliveryPrice(6.50);
+
+        // $shipping = new Shipping();
+        // $shipping->setStatus('À envoyer');
+        // $shipping->setPurchase($order);
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['customerData'][7]]);
         if ($user) {
@@ -138,6 +143,7 @@ class CardController extends AbstractController
         $order->setPriceHt($priceHt);
 
         $em->persist($order);
+        // $em->persist($shipping);
         $em->flush();
 
         // Retourner une réponse JSON avec l'ID de la session de checkout
@@ -188,6 +194,32 @@ class CardController extends AbstractController
                 // Créer une nouvelle commande
                 $order->setStatus($session->payment_status);
                 $em->persist($order);
+
+                $campagneResults = $em->getRepository(Campagne::class)->findPriceTotalInOrderPercampagne($order->getId());
+
+                foreach ($campagneResults as $key => $campagneResult) {
+                    $campagne = $em->getRepository(Campagne::class)->findOneBy(['id' => $campagneResult['id']]);
+
+                    $actualTotalCA = $campagne->getTotalCa() ?? 0;
+                    $newTotalCa = $actualTotalCA + $campagneResult['totalCA'];
+                    $campagne->setTotalCa($newTotalCa + 6.50);
+
+                    $actualTotalTax = $campagne->getTotalTaxamount() ?? 0;
+                    $newTotalTax = $actualTotalTax + $campagneResult['totalTaxAmount'];
+                    $campagne->setTotalTaxamount($newTotalTax);
+
+                    $actualPricePrint = $campagne->getTotalPricePrint() ?? 0;
+                    $newPricePrint = $actualPricePrint + $campagneResult['totalPricePrint'];
+                    $campagne->setTotalPricePrint($newPricePrint);
+
+                    $totalBenefCreator = 0.6 * ($newTotalCa - $newTotalTax - $newPricePrint);
+                    $campagne->setTotalBenefCreator($totalBenefCreator);
+
+                    $totalBenefCompany = 0.4 * ($newTotalCa - $newTotalTax - $newPricePrint);
+                    $campagne->setTotalBenefCompany($totalBenefCompany);
+
+                    $em->persist($campagne);
+                }
 
                 $em->flush();
 

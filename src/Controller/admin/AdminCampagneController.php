@@ -6,6 +6,7 @@ use App\Entity\Campagne;
 use App\Entity\CampagneStatus;
 use App\Entity\User;
 use App\Services\LogServices;
+use App\Services\PaypalTransferService;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -56,6 +57,9 @@ class AdminCampagneController extends AbstractController
                'nameproject' => $campagne->getNameProject(),
                'ncommande' => $campagne->getNumCommande(),
                'price' => $campagne->getPrice(),
+               'priceAti' => $campagne->getPriceAti(),
+               'pricePrint' => $campagne->getPricePrint(),
+               'totalTax' => $campagne->getTotalTax(),
                'paper' => $campagne->getPaper()->getName(),
                'size' => $campagne->getSize()->getName(),
                'weight' => $campagne->getWeight()->getWeight(),
@@ -156,7 +160,14 @@ class AdminCampagneController extends AbstractController
             return new JsonResponse(['error' => 'Aucune campagne trouvé avec l\'ID "%s".', $id]);
         }
 
-        $createdAt = ($campagne->getCreatedAt() !== null) ? $campagne->getCreatedAt()->format('Y-m-d') : '';
+        $nbvente = 0;
+        foreach ($campagne->getCampagneOrders() as $key => $campagneOrder) {
+            if ($campagneOrder->getPurchase()->getStatus() == 'paid') {
+                $nbvente = $campagneOrder->getQuantity() + $nbvente;
+            }
+        }
+
+        $createdAt = $campagne->getAcceptedAt()->format('Y-m-d');
         $today = date('Y-m-d');
         $diff = abs(strtotime($today) - strtotime($createdAt));
         $days = floor($diff / (60 * 60 * 24));
@@ -168,6 +179,9 @@ class AdminCampagneController extends AbstractController
             'nameproject' => $campagne->getNameProject(),
             'ncommande' => $campagne->getNumCommande(),
             'price' => $campagne->getPrice(),
+            'priceAti' => $campagne->getPriceAti(),
+            'pricePrint' => $campagne->getPricePrint(),
+            'totalTax' => $campagne->getTotalTax(),
             'fileSource' => $campagne->getFileSource().'.png',
             'status' => $campagne->getStatus()->getLibelle(),
             'paper' => $campagne->getPaper()->getName(),
@@ -178,6 +192,11 @@ class AdminCampagneController extends AbstractController
             'paypalemail' => $campagne->getUser()->getCreatorProfil()->getPaypalEmail() ?? '',
             'createdAt' => $createdAt,
             'days' => $days,
+            'nbvente' => $nbvente,
+            'ca' => $campagne->getTotalCa() ?? 0,
+            'benefCreator' => $campagne->getTotalBenefCreator() ?? 0,
+            'benefCompany' => $campagne->getTotalBenefCompany() ?? 0,
+            'totaltax' => $campagne->getTotalTaxamount(),
         ];
 
         return new JsonResponse($data);
@@ -245,5 +264,24 @@ class AdminCampagneController extends AbstractController
         $logServices->createCampagneLog($campagne, 'Campagne refusée', 'CAMPAGNE_REJECT');
 
         return new JsonResponse(['success' => 'Campagne refusée avec succès']);
+    }
+
+    #[Route('/api/admin/campagne/transfer', name: 'app_transfer_campagne')]
+    public function transfer(PaypalTransferService $paypalTransferService, Request $request): Response
+    {
+        // Récupérer les informations de paiement du formulaire
+        $amount = $request->get('amount');
+        $currency = $request->get('currency');
+        $recipientEmail = $request->get('recipient_email');
+
+        // Transférer l'argent avec le service PaypalTransferService
+        $result = $paypalTransferService->transfer(10, 'EUR', 'test@test.fr');
+
+        // Afficher le résultat
+        if ($result) {
+            return $this->redirectToRoute('success');
+        } else {
+            return $this->redirectToRoute('error');
+        }
     }
 }

@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 export const CreatorProfilForm = () => {
 
     /* DATA */
+    const [file, setFile] = useState('');
     const [displayname, setDisplayname] = useState('');
     const [bio, setBio] = useState('');
     const [instagram, setInstagram] = useState('');
@@ -44,6 +45,8 @@ export const CreatorProfilForm = () => {
         e.preventDefault();
         setIsSaving(true);
         let formData = new FormData()
+
+        formData.append("file", file)
         formData.append("displayname", displayname)
         formData.append("bio", bio)
         formData.append("instagram", instagram)
@@ -80,6 +83,11 @@ export const CreatorProfilForm = () => {
     /** VUE */
     return (
         <form>
+            <label>
+                Profil picture :
+                <input type="file" accept="application/png" onChange={e => (setFile(e.target.files[0]))} />
+            </label>
+            <br />
             <label>
                 Display name :
                 <input type="text" value={displayname} onChange={e => (setDisplayname(e.target.value))} />

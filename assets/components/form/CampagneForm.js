@@ -50,15 +50,43 @@ export const CampagneForm = () => {
                     timer: 1500
                 })
                 setIsSaving(false);
+                setFile('')
+                setProjectName('')
+                setPrice('')
+                setDescription('')
             })
             .catch((error) => {
-                console.log(error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'erreur',
-                    showConfirmButton: false,
-                    timer: 2500
-                })
+                console.error(error.response.status);
+                if (error.response.status == 401) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Vous devez etre connecté pour soumettre une création',
+                        html:
+                            'Vous devez etre connecté pour soumettre une création, ' +
+                            '<a href="http://127.0.0.1:8000/login">Se connecter</a>',
+                        showConfirmButton: false,
+                        timer: 5500
+                    })
+                } else if (error.response.status == 500) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur, veuillez réessayer',
+                        showConfirmButton: false,
+                        timer: 2500
+                    })
+
+                    setFile('')
+                    setProjectName('')
+                    setPrice('')
+                    setDescription('')
+                } else if (error.response.status == 500) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur, veuillez réessayer',
+                        showConfirmButton: false,
+                        timer: 5500
+                    })
+                }
                 setIsSaving(false)
             });
     };

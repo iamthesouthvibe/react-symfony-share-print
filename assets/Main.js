@@ -24,6 +24,10 @@ import { AdminOrders } from './Pages/AdminOrders';
 import { AdminOrderDetails } from './Pages/AdminOrderDetails';
 import { ChangePassword } from './Pages/ChangePassword';
 import { ResetPassword } from './Pages/ResetPassword';
+import { CreatorsList } from './Pages/CreatorsList';
+import { CreatorDetail } from './Pages/CreatorDetail';
+import { AdminLookBookOverview } from './Pages/AdminLookBookOverview';
+import Lookbook from './Pages/Lookbook';
 
 function Main() {
     const { isAuthenticated, userRole } = useAuth();
@@ -42,6 +46,9 @@ function Main() {
                     <Route exact path="/success_payment" element={<SuccessPayment />} />
                     <Route exact path="/change_password" element={<ChangePassword />} />
                     <Route exact path="/reset-password/:token" element={<ResetPassword />} />
+                    <Route exact path="/creators" element={<CreatorsList />} />
+                    <Route exact path="/creator/detail/:id" element={<CreatorDetail />} />
+                    <Route exact path="/lookbook" element={<Lookbook />} />
                     {isAuthenticated && userRole.includes('ROLE_USER') ? <Route exact path="/account" element={<Account />} /> : <Route exact path="/account" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_USER') ? <Route exact path="/orders" element={<Orders />} /> : <Route exact path="/account" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_CREATOR') ? <Route exact path="/creator_profil" element={<CreatorProfile />} /> : <Route exact path="/creator_profil" element={<Navigate to="/login" />} />}
@@ -54,6 +61,7 @@ function Main() {
                     {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/campagne/details/:id" element={<AdminCampagneDetails />} /> : <Route exact path="/admin/campagne/overview" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/ecommerce/order" element={<AdminOrders />} /> : <Route exact path="/admin/ecommerce/order" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/order/details/:id" element={<AdminOrderDetails />} /> : <Route exact path="/admin/order/details/:id" element={<Navigate to="/login" />} />}
+                    {isAuthenticated && userRole.includes('ROLE_ADMIN') ? <Route exact path="/admin/marketing/overview" element={<AdminLookBookOverview />} /> : <Route exact path="/admin/marketing/overview" element={<Navigate to="/login" />} />}
                 </Routes>
             </Router>
         </ErrorBoundary>

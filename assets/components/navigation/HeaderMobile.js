@@ -1,0 +1,104 @@
+import React, { useEffect, useState } from 'react';
+import { Link, NavLink } from "react-router-dom";
+import useAuth from '../../contexts/AuthContext';
+
+
+const HeaderMobile = () => {
+    const [activeLinkIndex, setActiveLinkIndex] = useState(-1);
+
+    const handleLogout = () => {
+        localStorage.clear();
+        window.location.pathname = "/";
+    }
+
+    const { isAuthenticated, userRole } = useAuth();
+
+    const [cartItemsCount, setCartItemsCount] = useState(0);
+
+    useEffect(() => {
+        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+        setCartItemsCount(cartItems.length);
+    }, []);
+
+    const [isActive, setIsActive] = useState(false);
+
+    const handleIsActive = () => {
+        setIsActive(!isActive)
+    }
+
+
+    useEffect(() => {
+        document.body.style.overflow = isActive ? 'hidden' : 'unset';
+    }, [isActive]);
+
+    return (
+        <>
+            <div>
+                <div class="header-mobile">
+                    <div>
+                        <NavLink to="/" className="header-logo">PrintShare</NavLink>
+                    </div>
+                    <div>
+                        <Link class="hover-underline-animation" to="/card">card (<span class="text-primary">{cartItemsCount}</span>)</Link>
+                        <svg class={`burger-btn ${isActive ? 'active' : ''}`} width="37" height="20" viewBox="0 0 40 26" xmlns="http://www.w3.org/2000/svg" onClick={handleIsActive}>
+                            <rect class="burger-btn--1" width="40" height="3" rx="3" ry="3" />
+                            <rect class="burger-btn--2" width="40" height="3" y="10" rx="3" ry="3" />
+                            <rect class="burger-btn--3" width="40" height="3" y="20" rx="3" ry="3" />
+                        </svg>
+                    </div>
+                </div>
+                {isActive &&
+                    <div className="header-mobile-container">
+                        <div className="header-mobile-container-contents">
+                            <NavLink
+                                exact
+                                to="/shop">
+                                Shop
+                            </NavLink>
+                            <div className="underline-mobile"></div>
+                            <NavLink
+                                exact
+                                to="/create_campagne">
+                                Design your own
+                            </NavLink>
+                            <div className="underline-mobile"></div>
+                            <NavLink
+                                exact
+                                to="/create_campagne">
+                                How its work
+                            </NavLink>
+                            <div className="underline-mobile"></div>
+                            <NavLink
+                                exact
+                                to="/creators">
+                                Designer & Creators
+                            </NavLink>
+                            <div className="underline-mobile"></div>
+                            <NavLink
+                                exact
+                                to="/lookbook">
+                                Lookbook
+                            </NavLink>
+                        </div>
+                        <div className="header-mobile-container-bottom">
+                            {/* <NavLink
+                                exact
+                                to="/">
+                                Contact
+                            </NavLink>
+                            <NavLink
+                                exact
+                                to="/">
+                                Faq
+                            </NavLink> */}
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </>
+    )
+}
+
+export default HeaderMobile;
+

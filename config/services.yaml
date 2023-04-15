@@ -6,6 +6,8 @@
 parameters:
     campagnes_dir: "%kernel.project_dir%/public/images/campagnes"
     print_dir: "%kernel.project_dir%/public/images/print"
+    creator_dir: "%kernel.project_dir%/public/images/creators"
+    lookbook_dir: "%kernel.project_dir%/public/images/lookbook"
 
 services:
     # default configuration for services in *this* file
@@ -21,6 +23,12 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'''
+
+            
+    App\Services\PaypalTransferService:
+        arguments:
+            $clientId: 'AeBDNI1tCDrXwitbwbmt5huiP-Sy-M3Xh0CAXuskeW7Pxg5esM8Ju3vbSUs3_ucAu5O6gP5Iy_mZm0Ux'
+            $clientSecret: 'EPMWus3z0JANJuEu2PInM7z67MzbpqZQtGe2gAp81a9JDSs484kn0cJmgx01z5QSKIeEHQdNwXfdN1GD'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -20,11 +20,11 @@ class PdfService
         $this->domPdf->setOptions($pdfOptions);
     }
 
-    public function showPdfFile($html)
+    public function showPdfFile($html, $filename)
     {
         $this->domPdf->loadHtml($html);
         $this->domPdf->render();
-        $this->domPdf->stream('orders_print.pdf', [
+        $this->domPdf->stream($filename, [
             'Attachement' => true,
         ]);
     }
@@ -45,7 +45,10 @@ class PdfService
     public function generateBinaryPDF($html)
     {
         $this->domPdf->loadHtml($html);
+        $this->domPdf->setPaper('A4', 'portrait');
         $this->domPdf->render();
-        $this->domPdf->output();
+        $output = $this->domPdf->output();
+
+        return $output;
     }
 }

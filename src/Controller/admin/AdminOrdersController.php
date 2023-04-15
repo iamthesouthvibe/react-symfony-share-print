@@ -3,14 +3,19 @@
 namespace App\Controller\admin;
 
 use App\Entity\Order;
+use App\Entity\Shipping;
+use App\Entity\ShippingStatus;
 use App\Entity\User;
+use App\Services\EmailService;
 use App\Services\PdfService;
 use Doctrine\ORM\EntityManagerInterface;
+use Dompdf\Dompdf;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AdminOrdersController extends AbstractController
@@ -40,7 +45,8 @@ class AdminOrdersController extends AbstractController
 
         foreach ($orders as $order) {
             $printStatus = ($order->getIsPrint() === false) ? 'À imprimer' : 'Imprimé';
-            $sendStatus = ($order->getIsSend() === false) ? 'À envoyer' : 'Envoyé';
+            // $sendStatus = ($order->getIsSend() === false) ? 'À envoyer' : 'Envoyé';
+            $lastShippingStatus = ($order->getShippings()->last() == true) ? $order->getShippings()->last()->getShippingStatus()->getLibelle() : 'À envoyer';
             $data[] = [
                 'id' => $order->getId(),
                 'createdAt' => $order->getCreatedAt()->format('Y-m-d'),
@@ -52,7 +58,7 @@ class AdminOrdersController extends AbstractController
                 'total_price' => $order->getTotalPrice(),
                 'status' => $order->getStatus(),
                 'print_status' => $printStatus,
-                'send_status' => $sendStatus,
+                'send_status' => $lastShippingStatus,
             ];
         }
 
@@ -81,6 +87,7 @@ class AdminOrdersController extends AbstractController
 
         $printStatus = ($order->getIsPrint() === false) ? 'À imprimer' : 'Imprimé';
         $sendStatus = ($order->getIsSend() === false) ? 'À envoyer' : 'Envoyé';
+        $lastShippingStatus = ($order->getShippings()->last() == true) ? $order->getShippings()->last()->getShippingStatus()->getLibelle() : 'À envoyer';
 
         $data = [
             'createdAt' => $order->getCreatedAt()->format('Y-m-d'),
@@ -94,7 +101,7 @@ class AdminOrdersController extends AbstractController
             'tax' => $order->getTaxAmount(),
             'status' => $order->getStatus(),
             'print_status' => $printStatus,
-            'send_status' => $sendStatus,
+            'send_status' => $lastShippingStatus,
         ];
 
         $CampagneOrders = $order->getCampagneOrders();
@@ -134,26 +141,39 @@ class AdminOrdersController extends AbstractController
 
         $ordersList = $em->getRepository(Order::class)->findOrderByCampagneAndQuantity();
 
-        $html = $this->renderView('emails/template_print_order.html.twig', [
+        $html = $this->renderView('pdf/template_print_order.html.twig', [
             'orders' => $orders,
             'ordersList' => $ordersList,
         ]);
-
-        $response = $pdf->showPdfFile($html);
 
         $date = date('Y-m-d'); // Récupération de la date du jour au format "année-mois-jour"
         $unique_id = uniqid(); // Génération d'un identifiant unique
         $unique_id = substr($unique_id, -5); // Récupération des 5 derniers caractères de l'identifiant unique
 
         $filename = $date.'_'.$unique_id.'.pdf';
+        $response = $pdf->showPdfFile($html, $filename);
+
         $pdf->savePdfFile($html, $this->getParameter('print_dir'), $filename);
 
-        return new Response($response);
+        return new Response($response, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
+        ]);
     }
 
     #[Route('/api/admin/order/printstatus/{id}', name: 'app_print_status_campagne')]
-    public function changePrintStatus(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $logServices)
+    public function changePrintStatus(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request)
     {
+        $token = $request->headers->get('Authorization');
+        $token = str_replace('Bearer ', '', $token);
+
+        try {
+            $data = $jwtEncoder->decode($token);
+        } catch (JWTDecodeFailureException $e) {
+            return new JsonResponse(['error' => 'Token is invalid']);
+        }
+
+        // LogServices $logServices
         $order = $em
             ->getRepository(Order::class)
             ->find($id);
@@ -170,5 +190,159 @@ class AdminOrdersController extends AbstractController
         // $logServices->createCampagneLog($campagne, 'Campagne refusée', 'CAMPAGNE_REJECT');
 
         return new JsonResponse(['success' => 'La commande a été noté comme imprimé']);
+    }
+
+    #[Route('/api/admin/print/delivery', name: 'app_admin_print_delivery')]
+    public function exportOrders(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request): Response
+    {
+        $token = $request->headers->get('Authorization');
+        $token = str_replace('Bearer ', '', $token);
+
+        try {
+            $data = $jwtEncoder->decode($token);
+        } catch (JWTDecodeFailureException $e) {
+            return new JsonResponse(['error' => 'Token is invalid']);
+        }
+
+        $orders = $em->getRepository(Order::class)->findBy(['status' => 'paid', 'isSend' => false, 'isPrint' => true], ['id' => 'DESC']);
+        $pdfs = [];
+
+        if (!empty($orders)) {
+            // boucle sur les commandes et crée un PDF pour chaque commande
+            foreach ($orders as $order) {
+                $html = $this->renderView('pdf/template_print_order_resume.html.twig', [
+                'order' => $order,
+            ]);
+
+                $pdf = new Dompdf();
+                $options = $pdf->getOptions();
+                $options->setIsRemoteEnabled(true);
+                $pdf->setOptions($options);
+
+                $pdf->loadHtml($html);
+                $pdf->setPaper('A4', 'portrait');
+                $pdf->render();
+                $pdfs[$order->getId()] = $pdf->output();
+            }
+
+            // crée un zip contenant tous les PDF
+            $zip = new \ZipArchive();
+            $zipName = 'resumeOrder-'.date('Y-m-d-H-i-s').'.zip';
+            // $zipPath = sys_get_temp_dir().'/'.$zipName;
+            $zipPath = $this->getParameter('kernel.project_dir').'/public/pdf/resumeOrder/'.$zipName;
+
+            if ($zip->open($zipPath, \ZipArchive::CREATE) !== true) {
+                throw new \RuntimeException('Impossible de créer le fichier zip');
+            }
+
+            foreach ($pdfs as $orderId => $pdfContent) {
+                $fileName = "order_$orderId.pdf";
+                $zip->addFromString($fileName, $pdfContent);
+            }
+
+            $zip->close();
+
+            // envoie la réponse avec le zip pour téléchargement
+            $response = new Response(file_get_contents($zipPath));
+            $response->headers->set('Content-Type', 'application/zip');
+            $response->headers->set('Content-Disposition', $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $zipName
+        ));
+
+            return $response;
+        } else {
+            return new JsonResponse(['error' => 'Aucune commande à expédié'], 404);
+        }
+    }
+
+    #[Route('/api/admin/order/shippingstatus/{id}', name: 'app_shipping_status_campagne')]
+    public function changeShippingStatus(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, EmailService $emailService)
+    {
+        $token = $request->headers->get('Authorization');
+        $token = str_replace('Bearer ', '', $token);
+
+        try {
+            $data = $jwtEncoder->decode($token);
+        } catch (JWTDecodeFailureException $e) {
+            return new JsonResponse(['error' => 'Token is invalid']);
+        }
+
+        $order = $em
+            ->getRepository(Order::class)
+            ->find($id);
+
+        if (!$order) {
+            return new JsonResponse(['error' => sprintf('Aucune commande trouvée avec l\'ID "%s".', $id)], 404);
+        }
+
+        if ($order->getSendAt() == null || $order->getShipCode() == null) {
+            $shipping = new Shipping();
+            $shippingStatus = $em->getRepository(ShippingStatus::class)->findOneBy(['code' => 'DR1']);
+
+            $shipping->setPurchase($order);
+            $shipping->setDate(new \DateTimeImmutable());
+            $shipping->setShippingStatus($shippingStatus);
+
+            $codeShipping = $request->request->get('idshipping');
+
+            $order->setShipCode($codeShipping);
+            $order->setSendAt(new \DateTimeImmutable());
+
+            $order->setIsSend(true);
+            $em->persist($order);
+            $em->persist($shipping);
+            $em->flush();
+
+            $emailService->sendEmail(
+                'emails/template.html.twig',
+                [
+                    'firstName' => $order->getCustomerFirstname() ?? '',
+                    'lastName' => $order->getCustomerLastname() ?? '',
+                    'message' => 'Bonjour votre commande a été déposé réceptionné par laposte, vous pouvez
+                                suivre votre commande en cliquant sur l\'url suivante : https://www.laposte.fr/outils/suivre-vos-envois?code='.$order->getShipCode(),
+                ],
+                $order->getCustomerEmail(),
+                'Votre commande est en route !'
+            );
+            // $logServices->createCampagneLog($campagne, 'Campagne refusée', 'CAMPAGNE_REJECT');
+
+            return new JsonResponse(['success' => 'La commande a été noté comme envoyé']);
+        } else {
+            return new JsonResponse(['error' => 'La commande a deja été noté comme envoyé'], 404);
+        }
+    }
+
+    #[Route('/api/admin/shipping/list', name: 'app_shipping_admin_list')]
+    public function shippingList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
+    {
+        /* DATA */
+        $token = $request->headers->get('Authorization');
+        $token = str_replace('Bearer ', '', $token);
+
+        try {
+            $data = $jwtEncoder->decode($token);
+        } catch (JWTDecodeFailureException $e) {
+            return new JsonResponse(['error' => 'You should to be connect for see orders'], 404);
+        }
+
+        $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'You should to be connect for see orders'], 404);
+        }
+
+        $shippings = $em->getRepository(ShippingStatus::class)->findAll();
+
+        $data = [];
+
+        foreach ($shippings as $key => $shipping) {
+            $data[] = [
+                'code' => $shipping->getCode(),
+               'libelle' => $shipping->getLibelle(),
+            ];
+        }
+
+        return new JsonResponse(['shippings' => $data]);
     }
 }

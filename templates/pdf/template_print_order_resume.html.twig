@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Document</title>
+		<style>
+			body {
+				font-family: sans-serif;
+				margin: 10px;
+				color: #000, }
+
+			h1,
+			h2,
+			h3,
+			p {
+				margin: 0
+			}
+
+			table {
+				width: 100%;
+				margin-bottom: 15px;
+				border: solid 0.5px #000;
+				color: #000000;
+				font-weight: 600;
+			}
+
+			table tbody tr td:first-child {
+				width: 40%;
+			}
+
+			table tbody tr td {
+				color: #000000;
+				font-weight: 600;
+			}
+
+			th {
+				text-align: left;
+			}
+
+			p {
+				color: #000000;
+				font-weight: 600;
+			}
+		</style>
+		<body>
+			<h2>Récapitulatif de la commande</h2>
+			<h3>N de commande :
+				{{ order.id }}</h3>
+			<h4>Date de la commande :
+				{{ order.createdAt|date("d/m/Y") }}</h4>
+			<table>
+				<thead>
+					<tr>
+						<th>Produit</th>
+						<th>Format</th>
+						<th>Grammage</th>
+						<th>Papier</th>
+						<th>Quantité</th>
+						<th>Prix unitaire</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for campagneOrder in order.campagneOrders %}
+						<tr>
+							<td>
+								{{ campagneOrder.campagne.nameProject }}</td>
+							<td>
+								{{ campagneOrder.campagne.size.name }}</td>
+							<td>
+								{{ campagneOrder.campagne.weight.weight }}GR</td>
+							<td>
+								{{ campagneOrder.campagne.paper.name }}</td>
+							<td>
+								{{ campagneOrder.quantity }}</td>
+							<td>
+								{{ campagneOrder.campagne.priceAti }}€</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			<h5>Sous total :
+				{{ order.priceHt + order.taxAmount}}€</h5>
+			<h5>Prix de la livraison :
+				{{ order.deliveryPrice}}€</h5>
+			<h5>Prix total :
+				{{ order.totalPrice}}</h5>
+
+			<h6>Addresse de livraison et de facturation :
+			</h6>
+			<div>
+				<p>
+					{{order.customerFirstname}}
+					{{order.customerLastname}}</p>
+				<p>{{ order.customerAddress }}</p>
+				<p>{{ order.customerZip }}</p>
+				<p>{{ order.customerCity}}</p>
+				<p>{{ order.customerCountry}}</p>
+
+				<p>
+					Mode de paiement :Carte de crédit
+				</p>
+				<p>
+					Merci pour votre commande !
+				</p>
+			</div>
+		</body>
+	</head>
+</html>

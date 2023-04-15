@@ -51,6 +51,9 @@ const AdminCampagneDetails = () => {
                     <p>{campagne.nameproject}</p>
                     <p>{campagne.ncommande}</p>
                     <p>{campagne.price}</p>
+                    <p>{campagne.priceAti}</p>
+                    <p>{campagne.pricePrint}</p>
+                    <p>{campagne.totalTax}</p>
                     <p>{campagne.fileSource}</p>
                     <p>{campagne.status}</p>
                     <p>{campagne.paper}</p>
@@ -61,6 +64,11 @@ const AdminCampagneDetails = () => {
                     <p>{campagne.paypalemail}</p>
                     <p>{campagne.createdAt}</p>
                     <p>{campagne.days}</p>
+                    <p>Chiffres d'affaires : {campagne.ca}€</p>
+                    <p>Bénéfice créateur : {campagne.benefCreator}€</p>
+                    <p>Bénéfice SharePrint : {campagne.benefCompany}€</p>
+                    <p>Campagne vendu : {campagne.nbvente}</p>
+                    <p>Montant de la taxe : {campagne.totaltax}€</p>
                 </>
             </LayoutAdmin>
 

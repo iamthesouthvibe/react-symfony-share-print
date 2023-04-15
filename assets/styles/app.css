@@ -68,3 +68,131 @@ table tbody tr td {
   border-radius: 8px;
   width: 200px;
 }
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+/* HEADER MOBILE */
+
+.header-mobile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-mobile div:nth-child(2) {
+  display: flex;
+  gap: 15px;
+}
+
+.header-mobile-container {
+  height: 100%;
+  background-color: #d9d9d9;
+  z-index: 100;
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  margin-top: 6px;
+  padding: 20px;
+}
+
+.header-mobile-container-contents {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.header-mobile-container-contents a {
+  font-size: 1.8rem;
+}
+
+.header-mobile-container-contents a:nth-of-type(odd) {
+  color: #f54e31;
+}
+
+.header-mobile-container-contents a:nth-of-type(even) {
+  color: #000;
+}
+
+.underline-mobile {
+  height: 1px;
+  width: 100%;
+  background: white;
+}
+
+.burger-btn {
+  overflow: visible;
+  cursor: pointer;
+  fill: #1e272e;
+}
+.burger-btn--1,
+.burger-btn--2,
+.burger-btn--3 {
+  transition: 0.2s;
+  transform-origin: center center;
+}
+.burger-btn.active .burger-btn--1 {
+  transform: translate(-7px, 7px) rotate(45deg);
+}
+.burger-btn.active .burger-btn--2 {
+  transform: translateX(20px);
+  opacity: 0;
+}
+.burger-btn.active .burger-btn--3 {
+  transform: translate(-7px, -7px) rotate(-45deg);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+}
+
+.header div:nth-child(2) {
+  display: flex;
+  gap: 25px;
+}
+
+.hover-underline-animation {
+  display: inline-block;
+  position: relative;
+}
+
+.hover-underline-animation::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 1.5px;
+  bottom: -2px;
+  left: 0;
+  background-color: #f54e31;
+  transform-origin: bottom right;
+  transition: transform 0.75s ease-out;
+}
+
+.hover-underline-animation:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.header div:nth-child(3) {
+  display: flex;
+  gap: 10px;
+}
+
+.header-logo {
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.text-primary {
+  color: #f54e31;
+}
+.hover-underline-animation.active {
+  color: #f54e31;
+}

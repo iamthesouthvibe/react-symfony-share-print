@@ -68,7 +68,7 @@ class ShopController extends AbstractController
                 'status' => $c->getStatus()->getLibelle(),
                 'fileSource' => $c->getFileSource().'.png',
                 'filename' => $c->getFileSource(),
-                'price' => $campagne->getPriceAti(),
+                'price' => $c->getPriceAti(),
             ];
         }
         // Filtrer les campagnes en fonction du statut

@@ -8,10 +8,12 @@ use App\Services\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class UserController extends AbstractController
 {
@@ -236,7 +238,7 @@ class UserController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/api/account/creator/update', name: 'app_creator_update')]
-    public function updateCreatorProfie(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
+    public function updateCreatorProfie(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, SluggerInterface $slugger, Request $request)
     {
         $token = $request->headers->get('Authorization');
         $token = str_replace('Bearer ', '', $token);
@@ -265,6 +267,34 @@ class UserController extends AbstractController
             $creatorProfil->setLinkedin($request->request->get('linkedin'));
             $creatorProfil->setBehance($request->request->get('behance'));
             $creatorProfil->setDribble($request->request->get('dribble'));
+
+            if ($request->request->get('file') !== '') {
+                $fileSource = $request->files->get('file');
+                $extension = pathinfo($fileSource->getClientOriginalName(), PATHINFO_EXTENSION);
+                $originalFilename = pathinfo($fileSource->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid();
+                $newFilename = $newFilename.'.'.$extension;
+
+                // init file system
+                $fsObject = new Filesystem();
+                $new_dir_path = $this->getParameter('creator_dir').'/'.$creatorProfil->getId();
+
+                if (!$fsObject->exists($new_dir_path)) {
+                    $fsObject->mkdir($new_dir_path, 0775);
+                }
+
+                // Move the file to the directory
+                try {
+                    $fileSource->move(
+                    $new_dir_path,
+                    $newFilename
+                );
+                } catch (FileException $e) {
+                    var_dump($e);
+                }
+                $creatorProfil->setFilename($newFilename);
+            }
 
             $creatorProfil->setUser($user);
             $user->setUpdatedAt(new \DateTimeImmutable());
