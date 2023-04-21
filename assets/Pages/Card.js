@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import Layout from "../components/Layout"
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { CartContext } from '../contexts/CartContext';
 
 const Card = () => {
     const [cartItems, setCartItems] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
 
+    const { updateCartItemsCount } = useContext(CartContext);
+
+
     useEffect(() => {
         const itemsFromLocalStorage = JSON.parse(localStorage.getItem('cartItems')) || [];
         setCartItems(itemsFromLocalStorage);
+        updateCartItemsCount(itemsFromLocalStorage.length);
     }, []);
+
 
     useEffect(() => {
         calculateTotalPrice();
@@ -54,10 +60,13 @@ const Card = () => {
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
     };
 
+
     const removeFromCart = (id) => {
         const updatedCartItems = cartItems.filter((item) => item.id !== id);
         setCartItems(updatedCartItems);
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+
+        updateCartItemsCount(updatedCartItems.length);
     };
 
     const [checkoutSessionId, setCheckoutSessionId] = useState(null);

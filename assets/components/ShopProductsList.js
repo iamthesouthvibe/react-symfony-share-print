@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import ReactPaginate from "react-paginate";
+import Campagne from './Partials/Campagne';
 
 const ShopProductsList = () => {
 
@@ -98,67 +99,37 @@ const ShopProductsList = () => {
         setCurrentPage(data.selected + 1);
     };
 
-
-    const [cartItemsCount, setCartItemsCount] = useState(0);
-
-    // Ajoute un produit dans le localStorage
-    const addToCart = (campagne) => {
-        let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-
-        // Vérifie si le produit est déjà dans le panier
-        let campagneInCart = false;
-        cartItems.forEach(item => {
-            if (item.id === campagne.id) {
-                item.quantity++;
-                item.total = item.quantity * item.price
-                campagneInCart = true;
-            }
-        });
-
-        // Ajoute le produit au panier s'il n'y est pas déjà
-        if (!campagneInCart) {
-            cartItems.push({ id: campagne.id, name: campagne.nameproject, price: campagne.price, quantity: 1, total: campagne.price });
-        }
-
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
-
-
-        setCartItemsCount(cartItems.length);
-    };
-
     return (
         <div>
-            <select onChange={handleSortOrderChange}>
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
-            </select>
-            <br />
-            Filtrer par taille :
-            <label>
-                A4
-                <input type="checkbox" checked={filterA4} onChange={handleCheckboxChangeA4} />
-            </label>
-            <label>
-                A3
-                <input type="checkbox" checked={filterA3} onChange={handleCheckboxChange} />
-            </label>
-            <label>
-                A2
-                <input type="checkbox" checked={filterA2} onChange={handleCheckboxChangeA2} />
-            </label>
-            <br />
-            {currentCampagnes.map(campagne => (
-                <>
-                    <Link to={`/shop/product/details/${campagne.slug}`}>
-                        <img src={'/images/campagnes/' + campagne.userid + '/' + campagne.fileSource} alt={campagne.nameproject} />
-                        <p> {campagne.nameproject}</p>
-                        <p> {campagne.name}</p>
-                        <p> {campagne.price}€</p>
-                    </Link>
-                    <br />
-                    <button onClick={() => addToCart(campagne)}>Ajouter au panier</button>
-                </>
-            ))}
+            <div className="shop-filter-container">
+                <div>
+                    <span className="text-large">Filter by size : </span>
+                    <label>
+                        A4
+                        <input type="checkbox" checked={filterA4} onChange={handleCheckboxChangeA4} />
+                    </label>
+                    <label>
+                        A3
+                        <input type="checkbox" checked={filterA3} onChange={handleCheckboxChange} />
+                    </label>
+                    <label>
+                        A2
+                        <input type="checkbox" checked={filterA2} onChange={handleCheckboxChangeA2} />
+                    </label>
+                </div>
+                <div>
+                    <select onChange={handleSortOrderChange}>
+                        <option value="desc">Most Recent</option>
+                        <option value="asc">Least Recent</option>
+                    </select>
+                </div>
+            </div>
+            <div className="shop-container-campagne">
+                {currentCampagnes.map(campagne => (
+                    <Campagne key={campagne.id} campagne={campagne} />
+                ))}
+            </div>
+
             <br />
             <ReactPaginate
                 breakLabel="..."
@@ -171,7 +142,7 @@ const ShopProductsList = () => {
                 containerClassName="pagination"
                 activeClassName="active"
             />
-        </div>
+        </div >
     )
 }
 

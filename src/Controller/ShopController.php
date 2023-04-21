@@ -23,6 +23,11 @@ class ShopController extends AbstractController
 
         foreach ($campagnes as $campagne) {
             $name = ($campagne->getUser()->getCreatorProfil() !== null) ? $campagne->getUser()->getCreatorProfil()->getDisplayName() : $campagne->getUser()->getFirstName().' '.$campagne->getUser()->getLastName();
+            $createdAt = $campagne->getAcceptedAt()->format('Y-m-d');
+            $today = date('Y-m-d');
+            $diff = abs(strtotime($today) - strtotime($createdAt));
+            $days = floor($diff / (60 * 60 * 24));
+
             $data[] = [
                'id' => $campagne->getId(),
                'userid' => $campagne->getUser()->getId(),
@@ -34,6 +39,7 @@ class ShopController extends AbstractController
                'paper' => $campagne->getPaper()->getName(),
                'size' => $campagne->getSize()->getName(),
                'weight' => $campagne->getWeight()->getWeight(),
+               'days' => $days,
            ];
         }
 
@@ -58,8 +64,14 @@ class ShopController extends AbstractController
 
         $campagnes = $campagne->getUser()->getCampagnes();
 
+        $campagnes->removeElement($campagne);
+
         $campagnesData = [];
         foreach ($campagnes as $c) {
+            $createdAt = ($c->getCreatedAt() !== null) ? $c->getCreatedAt()->format('Y-m-d') : '';
+            $today = date('Y-m-d');
+            $diff = abs(strtotime($today) - strtotime($createdAt));
+            $days = floor($diff / (60 * 60 * 24));
             $campagnesData[] = [
                 'id' => $c->getId(),
                 'userid' => $c->getUser()->getId(),
@@ -69,6 +81,7 @@ class ShopController extends AbstractController
                 'fileSource' => $c->getFileSource().'.png',
                 'filename' => $c->getFileSource(),
                 'price' => $c->getPriceAti(),
+                'days' => $days,
             ];
         }
         // Filtrer les campagnes en fonction du statut
@@ -87,6 +100,7 @@ class ShopController extends AbstractController
             'nameproject' => $campagne->getNameProject(),
             'ncommande' => $campagne->getNumCommande(),
             'price' => $campagne->getPriceAti(),
+            'description' => $campagne->getDescription(),
             'fileSource' => $campagne->getFileSource().'.png',
             'status' => $campagne->getStatus()->getLibelle(),
             'paper' => $campagne->getPaper()->getName(),

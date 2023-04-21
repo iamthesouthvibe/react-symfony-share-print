@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link, NavLink } from "react-router-dom";
 import useAuth from '../../contexts/AuthContext';
+import { CartContext } from '../../contexts/CartContext';
+
 
 const HeaderDesktop = () => {
     const [activeLinkIndex, setActiveLinkIndex] = useState(-1);
@@ -12,12 +14,13 @@ const HeaderDesktop = () => {
 
     const { isAuthenticated, userRole } = useAuth();
 
-    const [cartItemsCount, setCartItemsCount] = useState(0);
+    // const [cartItemsCount, setCartItemsCount] = useState(0);
+    const { cartItemsCount } = useContext(CartContext);
 
-    useEffect(() => {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-        setCartItemsCount(cartItems.length);
-    }, []);
+    // useEffect(() => {
+    //     const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    //     setCartItemsCount(cartItems.length);
+    // }, []);
 
 
     return (
@@ -44,7 +47,7 @@ const HeaderDesktop = () => {
                     className="hover-underline-animation"
                     activeClassName="active"
                     exact
-                    to="/create_campagne">
+                    to="/how-its-work">
                     How its work
             </NavLink>
                 <NavLink
@@ -64,12 +67,12 @@ const HeaderDesktop = () => {
             </div>
 
             <div>
-                <Link class="hover-underline-animation" to="/card">card (<span class="text-primary">{cartItemsCount}</span>)</Link>
-                <Link class="hover-underline-animation" to="/account"> {isAuthenticated ? 'Account' : 'Sign in'}</Link>
+                <NavLink activeClassName="active" className="hover-underline-animation" to="/card">card (<span class="card-inside">{cartItemsCount}</span>)</NavLink>
+                <NavLink activeClassName="active" className="hover-underline-animation" to="/account"> {isAuthenticated ? 'Account' : 'Sign in'}</NavLink>
                 {isAuthenticated ? <button onClick={handleLogout}>Logout</button> : ''}
-                {isAuthenticated && userRole.includes('ROLE_CREATOR') && (
+                {isAuthenticated && userRole.includes('ROLE_ADMIN') && (
                     <>
-                        <Link class="hover-underline-animation" to="/admin/profil/overview">Admin</Link>
+                        <NavLink className="hover-underline-animation" to="/admin/profil/overview">Admin</NavLink>
                     </>
                 )}
             </div>

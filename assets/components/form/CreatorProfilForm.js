@@ -36,8 +36,8 @@ export const CreatorProfilForm = () => {
             })
             .catch(error => {
                 console.log(error);
-                localStorage.clear();
-                window.location.pathname = "/";
+                // localStorage.clear();
+                // window.location.pathname = "/";
             });
     }, []);
 

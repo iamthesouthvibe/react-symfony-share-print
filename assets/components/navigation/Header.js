@@ -28,7 +28,7 @@ const useMediaQuery = (minWidth) => {
 
 
 export const Header = () => {
-    const isMobile = useMediaQuery(800);
+    const isMobile = useMediaQuery(1000);
 
     return (
         <>

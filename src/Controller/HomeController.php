@@ -19,7 +19,7 @@ class HomeController extends AbstractController
     public function lastProducts(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request): Response
     {
         // Get all campagnes
-        $campagnes = $em->getRepository(Campagne::class)->findBy(['status' => 2], ['id' => 'DESC'], 5);
+        $campagnes = $em->getRepository(Campagne::class)->findBy(['status' => 2, 'isBest' => false], ['id' => 'DESC'], 3);
 
         $data = [];
 
@@ -50,7 +50,7 @@ class HomeController extends AbstractController
     public function bestSellers(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request): Response
     {
         // Get all campagnes
-        $campagnes = $em->getRepository(Campagne::class)->findBy(['status' => 2, 'isBest' => true], ['id' => 'DESC'], 5);
+        $campagnes = $em->getRepository(Campagne::class)->findBy(['status' => 2, 'isBest' => true], ['id' => 'DESC'], 3);
 
         $data = [];
 

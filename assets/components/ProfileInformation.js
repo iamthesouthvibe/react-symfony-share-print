@@ -35,9 +35,10 @@ function ProfileInformation() {
                 setZip(user.zip);
             })
             .catch(error => {
-                console.log(error);
-                localStorage.clear();
-                window.location.pathname = "/";
+                if (error.response.status == 404) {
+                    localStorage.clear();
+                    window.location.pathname = "/";
+                }
             });
     }, []);
 

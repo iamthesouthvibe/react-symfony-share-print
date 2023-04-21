@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link, NavLink } from "react-router-dom";
 import useAuth from '../../contexts/AuthContext';
+import { CartContext } from '../../contexts/CartContext';
 
 
 const HeaderMobile = () => {
@@ -13,12 +14,7 @@ const HeaderMobile = () => {
 
     const { isAuthenticated, userRole } = useAuth();
 
-    const [cartItemsCount, setCartItemsCount] = useState(0);
-
-    useEffect(() => {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-        setCartItemsCount(cartItems.length);
-    }, []);
+    const { cartItemsCount } = useContext(CartContext);
 
     const [isActive, setIsActive] = useState(false);
 
@@ -39,11 +35,11 @@ const HeaderMobile = () => {
                         <NavLink to="/" className="header-logo">PrintShare</NavLink>
                     </div>
                     <div>
-                        <Link class="hover-underline-animation" to="/card">card (<span class="text-primary">{cartItemsCount}</span>)</Link>
-                        <svg class={`burger-btn ${isActive ? 'active' : ''}`} width="37" height="20" viewBox="0 0 40 26" xmlns="http://www.w3.org/2000/svg" onClick={handleIsActive}>
-                            <rect class="burger-btn--1" width="40" height="3" rx="3" ry="3" />
-                            <rect class="burger-btn--2" width="40" height="3" y="10" rx="3" ry="3" />
-                            <rect class="burger-btn--3" width="40" height="3" y="20" rx="3" ry="3" />
+                        <Link class="hover-underline-animation" to="/card">card (<span class="card-inside">{cartItemsCount}</span>)</Link>
+                        <svg class={`burger-btn ${isActive ? 'active' : ''}`} width="37" height="20" viewBox="0 0 37 20" xmlns="http://www.w3.org/2000/svg" onClick={handleIsActive}>
+                            <rect class="burger-btn--1" width="35" height="3" rx="3" ry="3" />
+                            <rect class="burger-btn--2" width="35" height="3" y="10" rx="3" ry="3" />
+                            <rect class="burger-btn--3" width="35" height="3" y="20" rx="3" ry="3" />
                         </svg>
                     </div>
                 </div>

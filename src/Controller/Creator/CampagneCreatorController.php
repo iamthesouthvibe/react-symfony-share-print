@@ -42,6 +42,12 @@ class CampagneCreatorController extends AbstractController
             return new JsonResponse(['error' => 'You should to be connect for post campagne'], 401);
         }
 
+        $creator = $em->getRepository(CreatorProfil::class)->findOneBy(['user' => $user]);
+
+        if (!$creator) {
+            $creator = new CreatorProfil();
+        }
+
         /* TRAITEMENTS */
         try {
             $campagne = new Campagne();
@@ -135,12 +141,14 @@ class CampagneCreatorController extends AbstractController
             $campagne->setTotalTax($request->request->get('totalTax'));
             $campagne->setPriceAti($request->request->get('totalPrice') + $pricePrint);
             $campagne->setStatus($em->getRepository(CampagneStatus::class)->findOneBy(['id' => 1], []));
-            $campane->isBest(false);
+            $campagne->setIsBest(false);
             $campagne->setUser($user);
             $campagne->setCreatedAt(new \DateTimeImmutable());
             $user->setRoles(['ROLE_CREATOR', 'ROLE_USER']);
             $em->persist($campagne);
             $em->persist($user);
+            $creator->setUser($user);
+            $em->persist($creator);
             $em->flush();
 
             // $user->setAddress($address);
