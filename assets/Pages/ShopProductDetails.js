@@ -67,78 +67,80 @@ const ShopProductDetails = () => {
     return (
         <div>
             <Layout>
-                <div className="header-shop-detail-container">
-                    <div className="header-shop-detail-container-left">
-                        <img src={'/images/campagnes/' + campagne.userid + '/' + campagne.fileSource} alt={campagne.nameproject} />
-                    </div>
-                    <div className="header-shop-detail-container-right">
-                        <div className="header-shop-detail-container-right-contents">
-                            <h1 className="name-h1roject">{campagne.nameproject}</h1>
-                            <p className="name-creator">{campagne.name}</p>
-                            <p className="price">{campagne.price}€</p>
-                            <div className="contents-shop">
-                                <div>
-                                    <p>{campagne.description}</p>
-                                </div>
-                                <div>
-                                    <p>Technical details</p>
-                                    <p>&bull; Paper : {campagne.paper}</p>
-                                    <p>&bull; Size : {campagne.size}</p>
-                                    <p>&bull; Weight : {campagne.weight}</p>
-                                </div>
-                                <div>
-                                    <button className="add-to-card" onClick={() => addToCart(campagne)}>Add to basket</button>
+                <div class="shop-detail-page">
+                    <div className="header-shop-detail-container">
+                        <div className="header-shop-detail-container-left">
+                            <img src={'/images/campagnes/' + campagne.userid + '/' + campagne.fileSource} alt={campagne.nameproject} />
+                        </div>
+                        <div className="header-shop-detail-container-right">
+                            <div className="header-shop-detail-container-right-contents">
+                                <h1 className="name-h1roject">{campagne.nameproject}</h1>
+                                <p className="name-creator">{campagne.name}</p>
+                                <p className="price">{campagne.price}€</p>
+                                <div className="contents-shop">
+                                    <div>
+                                        <p>{campagne.description}</p>
+                                    </div>
+                                    <div>
+                                        <p>Technical details</p>
+                                        <p>&bull; Paper : {campagne.paper}</p>
+                                        <p>&bull; Size : {campagne.size}</p>
+                                        <p>&bull; Weight : {campagne.weight}</p>
+                                    </div>
+                                    <div>
+                                        <button className="add-to-card" onClick={() => addToCart(campagne)}>Add to basket</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    {campagne.bio || campagne.instagram || campagne.linkedin || campagne.dribble || campagne.behance ? (
+                        <div className="creator-container">
+                            <h2 className="subtitle-home">About creator</h2>
+                            <div className="creator-container-contents">
+                                <div className="creator-container-contents-socialmedia">
+                                    <h4>
+                                        Social media
+                                </h4>
+                                    {campagne.instagram && (
+                                        <a href={campagne.instagram}>Instagram</a>
+                                    )}
+                                    {campagne.linkedin && (
+                                        <a href={campagne.linkedin}>Linkedin</a>
+                                    )}
+                                    {campagne.dribble && (
+                                        <a href={campagne.dribble}>Dribble</a>
+                                    )}
+                                    {campagne.behance && (
+                                        <a href={campagne.behance}>Behance</a>
+                                    )}
+                                </div>
+                                <div className="creator-container-contents-bio">
+                                    <h4>
+                                        Bio
+                                </h4>
+                                    <p>{campagne.bio}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    {campagne.campagnes && campagne.campagnes.length > 0 && (
+                        <div className="campaign-container">
+                            <h2 className="subtitle-home">More works about creator</h2>
+                            <div className="campaign-container-shop-row">
+                                {campagne.campagnes.map(c => (
+                                    <Campagne key={c.id} campagne={c} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
-
-                {campagne.bio || campagne.instagram || campagne.linkedin || campagne.dribble || campagne.behance ? (
-                    <div className="creator-container">
-                        <h2 className="subtitle-home">About creator</h2>
-                        <div className="creator-container-contents">
-                            <div className="creator-container-contents-socialmedia">
-                                <h4>
-                                    Social media
-                                </h4>
-                                {campagne.instagram && (
-                                    <a href={campagne.instagram}>Instagram</a>
-                                )}
-                                {campagne.linkedin && (
-                                    <a href={campagne.linkedin}>Linkedin</a>
-                                )}
-                                {campagne.dribble && (
-                                    <a href={campagne.dribble}>Dribble</a>
-                                )}
-                                {campagne.behance && (
-                                    <a href={campagne.behance}>Behance</a>
-                                )}
-                            </div>
-                            <div className="creator-container-contents-bio">
-                                <h4>
-                                    Bio
-                                </h4>
-                                <p>{campagne.bio}</p>
-                            </div>
-                        </div>
-                    </div>
-                ) : null}
-
-                {campagne.campagnes && campagne.campagnes.length > 0 && (
-                    <div className="campaign-container">
-                        <h2 className="subtitle-home">More works about creator</h2>
-                        <div className="campaign-container-shop-row">
-                            {campagne.campagnes.map(c => (
-                                <Campagne key={c.id} campagne={c} />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
                 <Footer />
             </Layout>
         </div>
+
     )
 }
 
