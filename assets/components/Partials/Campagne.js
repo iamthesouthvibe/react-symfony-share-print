@@ -2,8 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from "react-router-dom";
 import { CartContext } from '../../contexts/CartContext';
 
-
-
 const Campagne = ({ campagne }) => {
     const [cartItemsCount, setCartItemsCount] = useState(0);
 
@@ -27,7 +25,7 @@ const Campagne = ({ campagne }) => {
 
         // Ajoute le produit au panier s'il n'y est pas déjà
         if (!campagneInCart) {
-            cartItems.push({ id: campagne.id, name: campagne.nameproject, price: campagne.price, quantity: 1, total: campagne.price });
+            cartItems.push({ id: campagne.id, name: campagne.nameproject, price: campagne.price, quantity: 1, total: campagne.price, fileSource: campagne.fileSource, userId: campagne.userid });
         }
 
         localStorage.setItem('cartItems', JSON.stringify(cartItems));

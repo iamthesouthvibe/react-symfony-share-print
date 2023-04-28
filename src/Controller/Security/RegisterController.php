@@ -4,12 +4,12 @@ namespace App\Controller\Security;
 
 use App\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 class RegisterController extends AbstractController
 {
@@ -23,17 +23,22 @@ class RegisterController extends AbstractController
         if ($existingUser) {
             return new JsonResponse(['error' => 'Email already exists'], 400);
         }
+
+        if (empty($request->request->get('email')) && empty($request->request->get('email'))) {
+            return new JsonResponse(['error' => 'Error'], 400);
+        }
+
         // Création d'un nouvel utilisateur
         $user = new User();
         $user->setEmail($request->request->get('email'));
         $user->setRoles(['ROLE_USER']);
-        $user->setCreatedAt(new \DateTimeImmutable);
+        $user->setCreatedAt(new \DateTimeImmutable());
         $hashedPassword = $passwordHasher->hashPassword(
             $user,
             $request->request->get('password')
         );
         $user->setPassword($hashedPassword);
-  
+
         $entityManager->persist($user);
         $entityManager->flush();
 

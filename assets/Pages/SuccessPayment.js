@@ -15,7 +15,7 @@ export const SuccessPayment = () => {
             .then(function (response) {
                 console.log(response.data.success)
                 setMessage(response.data.success)
-                localStorage.clear('cartItems')
+                localStorage.removeItem('cartItems')
             })
             .catch(error => {
                 console.log(error.response.data.error);

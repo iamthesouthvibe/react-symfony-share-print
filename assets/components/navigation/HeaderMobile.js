@@ -60,7 +60,7 @@ const HeaderMobile = () => {
                             <div className="underline-mobile"></div>
                             <NavLink
                                 exact
-                                to="/create_campagne">
+                                to="/how-its-work">
                                 How its work
                             </NavLink>
                             <div className="underline-mobile"></div>
@@ -75,6 +75,10 @@ const HeaderMobile = () => {
                                 to="/lookbook">
                                 Lookbook
                             </NavLink>
+                            <div className="underline-mobile"></div>
+                            <NavLink to="/account"> {isAuthenticated ? 'Account' : 'Sign in'}</NavLink>
+                            <div className="underline-mobile"></div>
+                            {isAuthenticated ? <button onClick={handleLogout}>Logout</button> : ''}
                         </div>
                         <div className="header-mobile-container-bottom">
                             {/* <NavLink

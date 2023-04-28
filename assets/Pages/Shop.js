@@ -17,7 +17,7 @@ const Shop = () => {
     return (
         <Layout>
             <div id="page-shop">
-                <p className="subtitle-home text-large">Shop</p>
+                <h1 className="subtitle-home text-large">Shop</h1>
                 <ShopProductsList />
             </div>
             <Footer />
