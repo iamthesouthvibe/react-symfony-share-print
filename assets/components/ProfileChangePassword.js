@@ -72,22 +72,21 @@ export const ProfileChangePassword = () => {
 
     /* VUE */
     return (
-        <div>
-            <h1>Titre 1</h1>
+        <div className="page-account-container">
+            <h2>Change password</h2>
             <form>
-                <label>
-                    Password:
-                <input type="password" value={password} onChange={e => (setPassword(e.target.value))} />
-                </label>
+                <div className="form-group">
+                    <label> Password:  </label>
+                    <input type="password" value={password} onChange={e => (setPassword(e.target.value))} />
+                </div>
                 <br />
-                <label>
-                    Confirm password:
-                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
-                </label>
+                <div className="form-group">
+                    <label>Confirm password:</label>
+                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+                </div>
                 <br />
-                <button type="submit" onClick={handleSubmit} >Change password</button>
+                <button type="submit" className="submit-button" onClick={handleSubmit} >Change password</button>
             </form>
         </div>
-
     )
 }

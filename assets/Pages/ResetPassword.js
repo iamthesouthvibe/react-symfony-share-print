@@ -2,15 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Layout from '../components/Layout';
 
 export const ResetPassword = () => {
 
+    const [passwordError, setPasswordError] = useState('');
+    const [messageConfirmPasswordError, setErrorMessageConfirmPassword] = useState('');
+
+    const resetErrors = () => {
+        setPasswordError(null)
+        setErrorMessageConfirmPassword(null)
+    };
+
+    const validateCustomerData = () => {
+        const errors = {};
+        if (!password) {
+            errors.password = 'Le mot de passe ne peut pas être vide';
+            setPasswordError(errors.password);
+        } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
+            errors.password =
+                "Le mot de passe doit contenir au moins un chiffre et faire plus de 8 caractères";
+            setPasswordError(errors.password);
+        }
+
+        if (password !== confirmPassword) {
+            errors.confirmPassword =
+                "Le mot de passe n'est pas identique";
+            setErrorMessageConfirmPassword(errors.confirmPassword)
+        }
+
+        return Object.keys(errors).length ? errors : null;
+    }
+
     const { token } = useParams();
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        resetErrors();
+        const errors = validateCustomerData();
+        if (errors) {
+            // Si des erreurs sont présentes, les afficher sous les inputs correspondants
+            return;
+        }
         setIsSaving(true);
         let formData = new FormData();
         formData.append("password", password);
@@ -42,15 +78,26 @@ export const ResetPassword = () => {
     };
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
-                <label>
-                    New Password:
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-                </label>
-                <br />
-                <button type="submit">submit</button>
-            </form>
-        </div>
+        <Layout>
+            <div className="page-account">
+                <h1 className="subtitle-home text-large">Reset your password</h1>
+                <form onSubmit={handleSubmit} className="form-sign">
+                    <div className="form-group">
+                        <label>New Password </label>
+                        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="New password" />
+                        {passwordError && <span className="error">{passwordError}</span>}
+                    </div>
+                    <br />
+                    <div className="form-group">
+                        <label>Confirm Password:</label>
+                        <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm Password" />
+                        {messageConfirmPasswordError && <span className="error">{messageConfirmPasswordError}</span>}
+                    </div>
+                    <br />
+                    <button type="submit" className="submit-button">submit</button>
+                </form>
+            </div>
+
+        </Layout>
     )
 }

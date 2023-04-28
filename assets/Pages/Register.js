@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import Layout from "../components/Layout";
 import Swal from 'sweetalert2';
+import { Link } from 'react-router-dom';
 
 function Register() {
 
@@ -31,7 +32,7 @@ function Register() {
         }
 
         if (!password) {
-            errors.password = 'L\'adresse e-mail ne peut pas être vide';
+            errors.password = 'Le mot de passe ne peut pas être vide';
             setPasswordError(errors.password);
         } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
             errors.password =
@@ -41,7 +42,7 @@ function Register() {
 
         if (password !== confirmPassword) {
             errors.confirmPassword =
-                "Le mot de passe doit contenir au moins un chiffre et faire plus de 8 caractères";
+                "Le mot de passe n'est pas identique";
             setErrorMessageConfirmPassword(errors.confirmPassword)
         }
 
@@ -130,6 +131,9 @@ function Register() {
                     <br />
                     <button type="submit" disabled={isSaving} onClick={handleSubmit} className="submit-button">Register</button>
                 </form>
+                <div className="container-forget-and-signup">
+                    <p>Have an account? <Link to="/login" className="text-large">Sign in</Link></p>
+                </div>
             </div>
         </Layout>
     );

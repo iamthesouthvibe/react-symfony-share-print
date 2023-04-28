@@ -83,49 +83,47 @@ function ProfileInformation() {
 
     /** VUE */
     return <>
-        <p>Account</p>
-        <h1>Informations utilisateur</h1>
-
-        <form>
-            <label>
-                FirstName:
-                <input type="text" value={firstname} onChange={e => (setFirstName(e.target.value))} />
-            </label>
-            <br />
-            <label>
-                LastName:
-                <input type="text" value={lastname} onChange={e => (setLastName(e.target.value))} />
-            </label>
-            <br />
-            <label>
-                Email:
-                <input type="email" value={email} onChange={e => (setEmail(e.target.value))} />
-            </label>
-            <br />
-            <label>
-                Address:
-                <input type="text" value={address} onChange={e => (setAddress(e.target.value))} />
-            </label>
-            <br />
-            <label>
-                Country:
-                <input type="text" value={country} onChange={e => (setCountry(e.target.value))} />
-            </label>
-            <br />
-            <label>
-                City:
-                <input type="email" value={city} onChange={e => (setCity(e.target.value))} />
-            </label>
-            <br />
-            <label>
-                Zip:
-                <input type="text" value={zip} onChange={e => (setZip(e.target.value))} />
-            </label>
-            <br />
-
-            <button type="submit" disabled={isSaving} onClick={handleSubmit}>Register</button>
-        </form>
-
+        <div className="page-account-container">
+            <h2>Informations utilisateur</h2>
+            <form>
+                <div className="form-group">
+                    <label>FirstName: </label>
+                    <input type="text" value={firstname} onChange={e => (setFirstName(e.target.value))} />
+                </div>
+                <br />
+                <div className="form-group">
+                    <label>LastName:</label>
+                    <input type="text" value={lastname} onChange={e => (setLastName(e.target.value))} />
+                </div>
+                <br />
+                <div className="form-group">
+                    <label>Email: </label>
+                    <input type="email" value={email} onChange={e => (setEmail(e.target.value))} />
+                </div>
+                <br />
+                <div className="form-group">
+                    <label>Address:</label>
+                    <input type="text" value={address} onChange={e => (setAddress(e.target.value))} />
+                </div>
+                <br />
+                <div className="form-group">
+                    <label> Country:</label>
+                    <input type="text" value={country} onChange={e => (setCountry(e.target.value))} />
+                </div>
+                <br />
+                <div className="form-group">
+                    <label>City:</label>
+                    <input type="email" value={city} onChange={e => (setCity(e.target.value))} />
+                </div>
+                <br />
+                <div className="form-group">
+                    <label>Zip:</label>
+                    <input type="text" value={zip} onChange={e => (setZip(e.target.value))} />
+                </div>
+                <br />
+                <button type="submit" className="submit-button" disabled={isSaving} onClick={handleSubmit}>Register</button>
+            </form>
+        </div>
     </>
 }
 

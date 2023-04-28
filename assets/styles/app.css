@@ -896,6 +896,33 @@ a {
   gap: 10px;
 }
 
+.account-header {
+  display: flex;
+  overflow-x: scroll;
+  gap: 15px;
+  box-sizing: border-box;
+  height: 40px;
+  margin: 0 8px;
+}
+
+.account-header a {
+  flex: none;
+  max-width: 100%;
+  padding-right: 10px;
+}
+
+.page-account-container {
+  margin: 0 8px;
+}
+
+.page-account-container h2 {
+  margin-top: 20px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
 /* styles pour les petits écrans */
 /* ------------------------------ */
 
