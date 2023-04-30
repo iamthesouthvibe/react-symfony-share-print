@@ -923,6 +923,14 @@ a {
   font-size: 1.3rem;
 }
 
+.page-account-container textarea {
+  width: 100%;
+  height: 160px;
+  border: solid 1px;
+  font-size: 1.2rem;
+  font-family: Helvetica;
+}
+
 /* styles pour les petits écrans */
 /* ------------------------------ */
 

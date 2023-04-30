@@ -4,69 +4,116 @@ import Swal from 'sweetalert2';
 
 export const ProfileChangePassword = () => {
 
+    const [passwordError, setPasswordError] = useState('');
+    const [messageConfirmPasswordError, setErrorMessageConfirmPassword] = useState('');
+
+    const resetErrors = () => {
+        setPasswordError(null)
+        setErrorMessageConfirmPassword(null)
+    };
+
+    const validateCustomerData = () => {
+        const errors = {};
+        if (!password) {
+            errors.password = 'Le mot de passe ne peut pas être vide';
+            setPasswordError(errors.password);
+        } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
+            errors.password =
+                "Le mot de passe doit contenir au moins un chiffre et faire plus de 8 caractères";
+            setPasswordError(errors.password);
+        }
+
+        if (password !== confirmPassword) {
+            errors.confirmPassword =
+                "Le mot de passe n'est pas identique";
+            setErrorMessageConfirmPassword(errors.confirmPassword)
+        }
+
+        return Object.keys(errors).length ? errors : null;
+    }
+
     /* DATA */
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isSaving, setIsSaving] = useState(false)
+    const [submitCount, setSubmitCount] = useState(0);
 
     /* TRAITEMENTS */
     const handleSubmit = async (e) => {
         e.preventDefault();
+        resetErrors();
+        const errors = validateCustomerData();
+        if (errors) {
+            // Si des erreurs sont présentes, les afficher sous les inputs correspondants
+            return;
+        }
         setIsSaving(true);
         let formData = new FormData()
         formData.append("password", password)
 
-        if (password !== confirmPassword) {
-            alert('password not match')
-            setPassword('')
-            setConfirmPassword('')
-            return;
-        }
-
-        Swal.fire({
-            icon: 'https://www.boasnotas.com/img/loading2.gif',
-            title: "",
-            text: "Loading...",
-            closeOnClickOutside: false,
-            showConfirmButton: false,
-            timer: 2500
-        })
-
+        Swal.showLoading();
         axios.post('/api/account/change_password', formData, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },
         })
             .then((response) => {
-                Swal.fire({
-                    icon: 'success',
-                    title: response.data.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                })
-                setIsSaving(false);
-                setPassword('')
-                setConfirmPassword('')
+                if (response) {
+                    Swal.update({
+                        icon: 'success',
+                        title: response.data.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    })
+                    setIsSaving(false);
+                    setPassword('')
+                    setConfirmPassword('')
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
+                }
             })
             .catch((error) => {
                 if (error.response.status === 404) {
-                    Swal.fire({
+                    Swal.update({
                         icon: 'error',
                         title: error.response.data.error,
                         showConfirmButton: false,
                         timer: 2500
                     })
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
                 } else {
-                    Swal.fire({
+                    Swal.update({
                         icon: 'error',
                         title: "An error occurred",
                         showConfirmButton: false,
                         timer: 2500
                     })
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
                 }
                 setIsSaving(false)
                 setPassword('')
                 setConfirmPassword('')
+            })
+            .finally(() => {
+                // Réinitialiser les erreurs
+                resetErrors()
+                setSubmitCount(submitCount + 1);
+                if (submitCount === 2) {
+                    document.querySelector('.submit-button').setAttribute('disabled', true);
+                    document.querySelector('.submit-button').classList.add('disabled');
+                    document.querySelector('.submit-button').style.backgroundColor = "#D9D9D9";
+                    setTimeout(() => {
+                        document.querySelector('.submit-button').removeAttribute('disabled');
+                        document.querySelector('.submit-button').classList.remove('disabled');
+                        document.querySelector('.submit-button').style.backgroundColor = "#000";
+                        setSubmitCount(0);
+                    }, 60000);
+                }
             });
     };
 
@@ -77,15 +124,17 @@ export const ProfileChangePassword = () => {
             <form>
                 <div className="form-group">
                     <label> Password:  </label>
-                    <input type="password" value={password} onChange={e => (setPassword(e.target.value))} />
+                    <input type="password" value={password} onChange={e => (setPassword(e.target.value))} placeholder="New password" />
+                    {passwordError && <span className="error">{passwordError}</span>}
                 </div>
                 <br />
                 <div className="form-group">
                     <label>Confirm password:</label>
-                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm password" />
+                    {messageConfirmPasswordError && <span className="error">{messageConfirmPasswordError}</span>}
                 </div>
                 <br />
-                <button type="submit" className="submit-button" onClick={handleSubmit} >Change password</button>
+                <button type="submit" disabled={isSaving} className="submit-button" onClick={handleSubmit} >Change password</button>
             </form>
         </div>
     )
