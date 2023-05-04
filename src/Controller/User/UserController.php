@@ -39,7 +39,7 @@ class UserController extends AbstractController
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Token is invalid']);
+            return new JsonResponse(['error' => 'Token is invalid'], 401);
         }
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
@@ -88,7 +88,7 @@ class UserController extends AbstractController
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Token is invalid']);
+            return new JsonResponse(['error' => 'Token is invalid'], 401);
         }
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
@@ -112,7 +112,7 @@ class UserController extends AbstractController
             $user->setAddress($address);
             $user->setUpdatedAt(new \DateTimeImmutable());
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Error form'], 401);
+            return new JsonResponse(['error' => 'Error form'], 400);
         }
 
         $em->persist($user);
@@ -142,7 +142,7 @@ class UserController extends AbstractController
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Token is invalid']);
+            return new JsonResponse(['error' => 'Token is invalid'], 401);
         }
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
@@ -193,7 +193,7 @@ class UserController extends AbstractController
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Token is invalid']);
+            return new JsonResponse(['error' => 'Token is invalid'], 401);
         }
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
@@ -246,7 +246,7 @@ class UserController extends AbstractController
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Token is invalid']);
+            return new JsonResponse(['error' => 'Token is invalid'], 401);
         }
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
@@ -291,7 +291,7 @@ class UserController extends AbstractController
                     $newFilename
                 );
                 } catch (FileException $e) {
-                    var_dump($e);
+                    return new JsonResponse(['error' => 'Error form'], 400);
                 }
                 $creatorProfil->setFilename($newFilename);
             }
@@ -299,7 +299,7 @@ class UserController extends AbstractController
             $creatorProfil->setUser($user);
             $user->setUpdatedAt(new \DateTimeImmutable());
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Error form'], 401);
+            return new JsonResponse(['error' => 'Error form'], 400);
         }
 
         $em->persist($creatorProfil);
@@ -329,7 +329,7 @@ class UserController extends AbstractController
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Token is invalid']);
+            return new JsonResponse(['error' => 'Token is invalid'], 401);
         }
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
@@ -356,7 +356,7 @@ class UserController extends AbstractController
             $creatorProfil->setUser($user);
             $user->setUpdatedAt(new \DateTimeImmutable());
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Error form'], 401);
+            return new JsonResponse(['error' => 'Error form'], 400);
         }
 
         $em->persist($creatorProfil);

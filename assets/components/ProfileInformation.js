@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Layout from "../components/Layout"
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 
 
 function ProfileInformation() {
+
+    const navigate = useNavigate();
 
     // Errors
     const [firstnameError, setFirstnameError] = useState('');
@@ -99,9 +102,11 @@ function ProfileInformation() {
                 setZip(user.zip);
             })
             .catch(error => {
-                if (error.response.status == 404) {
-                    localStorage.clear();
-                    window.location.pathname = "/";
+                if (error.response.status == 401) {
+                    localStorage.removeItem('token');
+                    navigate('/login')
+                } else {
+                    navigate('/404')
                 }
             });
     }, []);
@@ -143,17 +148,25 @@ function ProfileInformation() {
                 }, 1500);
             })
             .catch((error) => {
-                console.log(error);
-                Swal.update({
-                    icon: 'error',
-                    title: 'erreur',
-                    showConfirmButton: false,
-                    timer: 2500
-                })
-                setIsSaving(false)
-                setTimeout(() => {
+                if (error.response.status == 401) {
                     Swal.close();
-                }, 1500);
+                    localStorage.removeItem('token');
+                    navigate('/login')
+                } else if (error.response.status == 404) {
+                    Swal.close();
+                    navigate('/404')
+                } else {
+                    Swal.update({
+                        icon: 'error',
+                        title: 'Form error',
+                        showConfirmButton: false,
+                        timer: 2500
+                    })
+                    setIsSaving(false)
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
+                }
             })
             .finally(() => {
                 // Réinitialiser les erreurs

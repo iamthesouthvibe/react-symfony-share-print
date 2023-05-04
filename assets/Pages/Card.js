@@ -108,6 +108,7 @@ const Card = () => {
     const [zipError, setZipError] = useState('');
     const [mobileError, setMobileError] = useState('');
     const [emailError, setEmailError] = useState('');
+    const [countryError, setCountryError] = useState('');
 
     const resetErrors = () => {
         setFirstnameError(null);
@@ -117,6 +118,7 @@ const Card = () => {
         setZipError(null);
         setMobileError(null)
         setEmailError(null)
+        setCountryError(null)
     };
 
     const validateEmail = (email) => {
@@ -126,7 +128,7 @@ const Card = () => {
 
     const validateCustomerData = () => {
         const errors = {};
-        const regex = /^[a-zA-Z ]+$/;
+        const regex = /^[a-zA-ZÀ-ÿ ]+$/;
         const regexZip = /^\d+$/;
         const regexMobile = /^\d+$/;
 
@@ -145,6 +147,11 @@ const Card = () => {
         if (typeof city !== 'string' || !city.trim() || !regex.test(city)) {
             errors.city = 'La ville doit être une chaîne de caractères';
             setCityError(errors.city);
+        }
+
+        if (typeof country !== 'string' || !country.trim() || !regex.test(country)) {
+            errors.country = 'La ville doit être une chaîne de caractères';
+            setCountryError(errors.country);
         }
 
         if (typeof zip !== 'string' || !zip.trim() || !regexZip.test(zip)) {
@@ -259,6 +266,7 @@ const Card = () => {
                                                 </option>
                                             ))}
                                         </select>
+                                        {countryError && <span className="error">{countryError}</span>}
                                     </div>
                                     <br />
                                     <div className="form-group">

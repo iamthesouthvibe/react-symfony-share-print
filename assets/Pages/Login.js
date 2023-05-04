@@ -63,9 +63,10 @@ function Login() {
         formData.append("email", email);
         formData.append("password", password);
 
+        Swal.showLoading();
         axios.post('/api/login', formData)
             .then((response) => {
-                Swal.fire({
+                Swal.update({
                     icon: 'success',
                     title: 'Vous etes connecté',
                     showConfirmButton: false,
@@ -76,18 +77,24 @@ function Login() {
                 setIsSaving(false);
                 setEmail('');
                 setPassword('');
-
-                setTimeout(function () {
+                setTimeout(() => {
+                    Swal.close();
+                }, 1500);
+                setTimeout(() => {
+                    Swal.close();
                     window.location.pathname = "/"
-                }, 1700);
+                }, 1550);
             })
             .catch((error) => {
-                Swal.fire({
+                Swal.update({
                     icon: 'error',
                     title: error.response.data.error,
                     showConfirmButton: false,
                     timer: 2500
                 })
+                setTimeout(() => {
+                    Swal.close();
+                }, 1500);
                 setIsSaving(false)
             })
     };
@@ -109,7 +116,7 @@ function Login() {
                         {passwordError && <span className="error">{passwordError}</span>}
                     </div>
                     <br />
-                    <button type="submit" className="submit-button">Login</button>
+                    <button type="submit" disabled={isSaving} className="submit-button">Login</button>
                 </form>
                 <div className="container-forget-and-signup">
                     <Link to="/change_password">Forget password ? <span className="text-large">Click here</span></Link>

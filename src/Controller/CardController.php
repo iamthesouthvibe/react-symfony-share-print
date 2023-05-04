@@ -236,7 +236,8 @@ class CardController extends AbstractController
                 'Merci pour votre commande !'
             );
 
-                return new JsonResponse(['success' => 'Votre commande a été realisé avec succés'], 200);
+                return new JsonResponse(['success' => 'Your order has been successfully completed!
+                You will receive an email summarizing your order'], 200);
             } else {
                 $order->setStatus($session->payment_status);
                 $em->persist($order);
@@ -253,10 +254,10 @@ class CardController extends AbstractController
                     'Merci pour votre commande !'
                 );
                 // Paiement échoué ou en attente
-                return new JsonResponse(['error' => 'Paiement échoué ou en attente'], 404);
+                return new JsonResponse(['error' => 'Failed or pending payment'], 404);
             }
         } else {
-            return new JsonResponse(['error' => 'La session a expirée, vous allez etre redirigé vers la page d\'accueil'], 404);
+            return new JsonResponse(['error' => 'Session has expired, you will be redirected to the home page'], 404);
         }
     }
 }

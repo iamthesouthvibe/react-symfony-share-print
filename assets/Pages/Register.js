@@ -71,9 +71,10 @@ function Register() {
         formData.append("email", email)
         formData.append("password", password)
 
+        Swal.showLoading();
         axios.post('/api/register', formData)
             .then((response) => {
-                Swal.fire({
+                Swal.update({
                     icon: 'success',
                     title: response.data.message,
                     showConfirmButton: false,
@@ -83,23 +84,35 @@ function Register() {
                 setEmail('')
                 setPassword('')
                 setConfirmPassword('')
-                navigate('/login')
+                setTimeout(() => {
+                    Swal.close();
+                }, 1500);
+                setTimeout(() => {
+                    navigate('/login')
+                }, 1600);
+
             })
             .catch((error) => {
                 if (error.response.status === 400) {
-                    Swal.fire({
+                    Swal.update({
                         icon: 'error',
                         title: error.response.data.error,
                         showConfirmButton: false,
                         timer: 2500
                     })
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
                 } else {
-                    Swal.fire({
+                    Swal.update({
                         icon: 'error',
                         title: "An error occurred",
                         showConfirmButton: false,
                         timer: 2500
                     })
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
                 }
                 setIsSaving(false)
             });
@@ -113,13 +126,13 @@ function Register() {
                 <form className="form-sign">
                     <div className="form-group">
                         <label>Email:</label>
-                        <input type="email" value={email} onChange={e => (setEmail(e.target.value), validateEmail(e.target.value))} placeholder="Email" />
+                        <input type="email" value={email} onChange={e => (setEmail(e.target.value))} placeholder="Email" />
                         {emailError && <span className="error">{emailError}</span>}
                     </div>
                     <br />
                     <div className="form-group">
                         <label>Password:</label>
-                        <input type="password" value={password} onChange={e => (setPassword(e.target.value), validate(e.target.value))} placeholder="Password" />
+                        <input type="password" value={password} onChange={e => (setPassword(e.target.value))} placeholder="Password" />
                         {passwordError && <span className="error">{passwordError}</span>}
                     </div>
                     <br />

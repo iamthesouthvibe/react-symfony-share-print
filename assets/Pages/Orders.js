@@ -3,8 +3,13 @@ import Layout from '../components/Layout'
 import { Link } from "react-router-dom";
 import useAuth from '../contexts/AuthContext';
 import axios from 'axios';
+import HeaderAccount from '../components/navigation/HeaderAccount';
+import Footer from '../components/navigation/Footer';
+import { useNavigate } from "react-router-dom";
 
 export const Orders = () => {
+
+    const navigate = useNavigate();
     const { isAuthenticated, userRole } = useAuth();
     const [orders, setOrders] = useState([]);
 
@@ -20,10 +25,12 @@ export const Orders = () => {
                 setOrders(response.data.orders)
             })
             .catch(error => {
-                console.log(error);
-
-                // localStorage.clear();
-                // window.location.pathname = "/";
+                if (error.response.status == 401) {
+                    localStorage.removeItem('token');
+                    navigate('/login')
+                } else {
+                    navigate('/404')
+                }
             });
     }
     useEffect(() => {
@@ -35,47 +42,69 @@ export const Orders = () => {
     const render = orders.map(order => {
         return (
             <>
-                {order.createdAt}
-                {order.shipping_address}
-                {order.shipping_city}
-                {order.shipping_country}
-                {order.shipping_zip}
-                {order.total_price}
-                {order.campagne_orders.map(product => {
-                    const imageUrl = `/images/campagnes/${product.creatorId}/${product.campagne_filesource}`;
-                    return (
-                        <>
-                            <img src={imageUrl} alt={product.campagne_name} />
-                            {product.campagne_name}
-                            {product.quantity}
-                            {product.campagne_price}
-                            {product.campagne_size}
-                            {product.campagne_weight}
-                            {product.campagne_paper}
-                        </>
-                    );
-                })}
+                <div className="order-container">
+                    <h2>#{order.id}</h2>
+                    <div className="order-container-top">
+                        <div>
+                            <p className="text-secondary">Order date</p>
+                            <p>{order.createdAt}</p>
+                        </div>
+                        <div>
+                            <p className="text-secondary">Payment</p>
+                            <p>Visa</p>
+                        </div>
+                        <div>
+                            <p className="text-secondary">Status</p>
+                            <p>{order.status}</p>
+                        </div>
+                    </div>
+                    <div className="order-container-middle">
+                        <div>
+                            <p className="text-secondary">Address</p>
+                            <p>{order.shipping_address}, {order.shipping_city} {order.shipping_country} <br />{order.shipping_zip}</p>
+                        </div>
+
+                        <div>
+                            <p className="text-secondary">Shipping Status</p>
+                            {order.shipping ? (<p>{order.shipping}</p>) : (<p>Waiting to be deposited</p>)}
+
+                        </div>
+                    </div>
+
+                    <div className="order-container-products">
+                        <p className="text-secondary">Product(s)</p>
+                        {order.campagne_orders.map(product => {
+                            const imageUrl = `/images/campagnes/${product.creatorId}/${product.campagne_filesource}`;
+                            return (
+                                <>
+                                    <div className="order-container-product">
+                                        <div>
+                                            <img src={imageUrl} alt={product.campagne_name} />
+                                        </div>
+                                        <div>
+                                            <p>{product.campagne_name}</p>
+                                            <p><span className="text-secondary">Qty : </span>{product.quantity}</p>
+                                            <p><span className="text-secondary">Price : </span>{product.campagne_price}€</p>
+                                            <p>{product.campagne_size} - {product.campagne_weight}GR - {product.campagne_paper}</p>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        })}
+                    </div>
+                    <p><span className="text-secondary">Shipping price :</span> 6.50€</p>
+                    <p><span className="text-secondary">Total price : </span>  <span className="text-large">{order.total_price}€</span></p>
+                </div>
             </>
         );
     });
     return (
         <Layout>
-            <br />
-            {isAuthenticated && userRole.includes('ROLE_USER') && (
-                <>
-                    <Link to="/account">Profil</Link>
-                    <Link to="/orders">Orders</Link>
-                </>
-            )}
-            {isAuthenticated && userRole.includes('ROLE_CREATOR') && (
-                <>
-                    <Link to="/creator_profil">Creator profil</Link>
-                    <Link to="/creator_settings">Creator settings</Link>
-                    <Link to="/creator_campagnes">Campagnes</Link>
-                </>
-            )}
-
-            {render}
+            <div className="page-account">
+                <HeaderAccount />
+                {render}
+            </div>
+            <Footer />
         </Layout >
     )
 }

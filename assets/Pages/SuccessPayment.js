@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useLocation, Link } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 export const SuccessPayment = () => {
     const location = useLocation();
@@ -32,8 +33,13 @@ export const SuccessPayment = () => {
     }
     return (
         <div>
-            {message}
-            <Link to="/">Retour à la page d'accueil</Link>
+            <Layout>
+                <div className="success-payment-container">
+                    <h1>{message}</h1>
+                    <br />
+                    <Link to="/" className="submit-button">Back to the home page</Link>
+                </div>
+            </Layout>
         </div>
     )
 }

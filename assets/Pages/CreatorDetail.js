@@ -6,8 +6,11 @@ import { Link } from "react-router-dom";
 import { CartContext } from '../contexts/CartContext';
 import Campagne from '../components/Partials/Campagne';
 import Footer from '../components/navigation/Footer';
+import { useNavigate } from "react-router-dom";
 
 export const CreatorDetail = () => {
+
+    const navigate = useNavigate();
 
     const { updateCartItemsCount } = useContext(CartContext);
 
@@ -20,6 +23,10 @@ export const CreatorDetail = () => {
     // Get best seller
     const [creator, setCreator] = useState([]);
 
+    if (!id) {
+        navigate('/404')
+    }
+
     /** TRAITEMENTS */
     const fetchData = async () => {
         axios.get(`/api/creator/detail/${id}`)
@@ -27,7 +34,11 @@ export const CreatorDetail = () => {
                 setCreator(response.data.creator)
             })
             .catch(error => {
-                console.log(error);
+                if (error.response.status == 404) {
+                    navigate('/404')
+                } else {
+                    navigate('/404')
+                }
             });
     }
     useEffect(() => {

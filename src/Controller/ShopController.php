@@ -49,11 +49,14 @@ class ShopController extends AbstractController
     #[Route('/api/shop/product/details/{slug}', name: 'app_shop_product_details')]
     public function productDetails(EntityManagerInterface $em, string $slug, Request $request): Response
     {
+        if (!$slug) {
+            return new JsonResponse(['error' => 'No slug'], 404);
+        }
         // Get all campagnes
         $campagne = $em->getRepository(Campagne::class)->findOneBy(['slug' => $slug], []);
 
         if (!$campagne) {
-            return new JsonResponse(['error' => 'Aucune campagne trouvé avec l\'ID : '.$id]);
+            return new JsonResponse(['error' => 'Aucune campagne trouvé avec l\'ID : '], 404);
         }
 
         $createdAt = ($campagne->getCreatedAt() !== null) ? $campagne->getCreatedAt()->format('Y-m-d') : '';

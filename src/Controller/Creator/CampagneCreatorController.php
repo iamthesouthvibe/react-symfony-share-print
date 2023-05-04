@@ -39,7 +39,7 @@ class CampagneCreatorController extends AbstractController
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
 
         if (!$user) {
-            return new JsonResponse(['error' => 'You should to be connect for post campagne'], 401);
+            return new JsonResponse(['error' => 'You should to be connect for post campagne'], 404);
         }
 
         $creator = $em->getRepository(CreatorProfil::class)->findOneBy(['user' => $user]);
@@ -153,7 +153,7 @@ class CampagneCreatorController extends AbstractController
 
             // $user->setAddress($address);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'Error form'], 400);
+            return new JsonResponse(['error' => 'Error form'], 404);
         }
 
         // Log
@@ -188,13 +188,13 @@ class CampagneCreatorController extends AbstractController
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse(['error' => 'You should to be connect for post campagne']);
+            return new JsonResponse(['error' => 'You should to be connect for post campagne'], 401);
         }
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
 
         if (!$user) {
-            return new JsonResponse(['error' => 'You should to be connect for post campagne']);
+            return new JsonResponse(['error' => 'You should to be connect for post campagne'], 404);
         }
 
         $campagnes = $em->getRepository(Campagne::class)->findBy(['user' => $user]);
@@ -206,6 +206,14 @@ class CampagneCreatorController extends AbstractController
             $today = date('Y-m-d');
             $diff = abs(strtotime($today) - strtotime($createdAt));
             $days = floor($diff / (60 * 60 * 24));
+            $benefCreator = $campagne->getTotalBenefCreator() ?? null;
+
+            $nbvente = 0;
+            foreach ($campagne->getCampagneOrders() as $key => $campagneOrder) {
+                if ($campagneOrder->getPurchase()->getStatus() == 'paid') {
+                    $nbvente = $campagneOrder->getQuantity() + $nbvente;
+                }
+            }
 
             $data[] = [
                'id' => $campagne->getId(),
@@ -224,16 +232,22 @@ class CampagneCreatorController extends AbstractController
                'filename' => $campagne->getFileSource().'.pdf',
                'status' => $campagne->getStatus()->getLibelle(),
                'createdAt' => $createdAt,
+               'benefCreator' => $benefCreator,
+               'nbvente' => $nbvente ?? null,
            ];
         }
 
-        return new JsonResponse(['campagnes' => array_reverse($data)]);
+        return new JsonResponse(['campagnes' => array_reverse($data)], 201);
     }
 
     #[Route('/api/creator/detail/{id}', name: 'app_creator_detail')]
     public function getCreatorDetail(EntityManagerInterface $em, string $id, Request $request)
     {
         $creator = $em->getRepository(CreatorProfil::class)->find($id);
+
+        if (!$creator || !$id) {
+            return new JsonResponse(['error' => ''], 404);
+        }
 
         $campagnes = $creator->getUser()->getCampagnes();
 
@@ -268,6 +282,6 @@ class CampagneCreatorController extends AbstractController
             'campagnes' => array_reverse($enCoursCampagnes),
          ];
 
-        return new JsonResponse(['creator' => array_reverse($data)]);
+        return new JsonResponse(['creator' => array_reverse($data)], 201);
     }
 }

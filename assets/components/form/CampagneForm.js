@@ -6,8 +6,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 import { Document, Page } from 'react-pdf';
 import { CartContext } from '../../contexts/CartContext';
 import Layout from "../Layout"
+import { useNavigate } from 'react-router-dom';
 
 export const CampagneForm = () => {
+
+    const navigate = useNavigate();
 
     const [cartItems, setCartItems] = useState([]);
     const { updateCartItemsCount } = useContext(CartContext);
@@ -128,18 +131,25 @@ export const CampagneForm = () => {
         formData.append("totalTax", totalTax)
         formData.append("totalPrice", totalPrice)
 
+        Swal.showLoading();
         axios.post('/api/campagne/add', formData, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },
         })
             .then((response) => {
-                Swal.fire({
+                Swal.update({
                     icon: 'success',
                     title: response.data.message,
                     showConfirmButton: false,
                     timer: 1500
                 })
+                setTimeout(() => {
+                    Swal.close();
+                }, 1500);
+                setTimeout(() => {
+                    navigate('/creator_campagnes')
+                }, 1550);
                 setIsSaving(false);
                 setFile('')
                 setProjectName('')
@@ -147,9 +157,8 @@ export const CampagneForm = () => {
                 setDescription('')
             })
             .catch((error) => {
-                console.error(error.response.status);
-                if (error.response.status == 401) {
-                    Swal.fire({
+                if (error.response.status == 401 || error.response.status == 404) {
+                    Swal.update({
                         icon: 'warning',
                         title: 'Vous devez etre connecté pour soumettre une création',
                         html:
@@ -158,25 +167,23 @@ export const CampagneForm = () => {
                         showConfirmButton: false,
                         timer: 5500
                     })
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
                 } else if (error.response.status == 500) {
-                    Swal.fire({
+                    Swal.update({
                         icon: 'error',
                         title: 'Erreur, veuillez réessayer',
                         showConfirmButton: false,
                         timer: 2500
                     })
-
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
                     setFile('')
                     setProjectName('')
                     setPrice('')
                     setDescription('')
-                } else if (error.response.status == 500) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erreur, veuillez réessayer',
-                        showConfirmButton: false,
-                        timer: 5500
-                    })
                 }
                 setIsSaving(false)
             });

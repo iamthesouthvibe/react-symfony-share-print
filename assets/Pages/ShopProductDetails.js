@@ -5,8 +5,11 @@ import Layout from "../components/Layout"
 import Campagne from '../components/Partials/Campagne';
 import Footer from '../components/navigation/Footer';
 import { CartContext } from '../contexts/CartContext'
+import { useNavigate } from "react-router-dom";
 
 const ShopProductDetails = () => {
+
+    const navigate = useNavigate();
 
     const { updateCartItemsCount } = useContext(CartContext);
 
@@ -24,13 +27,18 @@ const ShopProductDetails = () => {
             const response = await axios.get(`/api/shop/product/details/${slug}`);
             setCampagne(response.data.campagne);
         } catch (error) {
-            console.log(error);
-            // localStorage.clear();
-            // window.location.pathname = "/";
+            if (error.response.status == 404) {
+                navigate('/404')
+            } else {
+                navigate('/404')
+            }
         }
     };
 
     useEffect(() => {
+        if (!slug) {
+            navigate('/404')
+        }
         fetchCampagne(slug);
     }, [slug]);
 

@@ -30,6 +30,7 @@ import { AdminLookBookOverview } from './Pages/AdminLookBookOverview';
 import Lookbook from './Pages/Lookbook';
 import { CartProvider } from './contexts/CartContext'
 import Howitswork from './Pages/Howitswork';
+import { Page404 } from './Pages/Page404';
 
 function Main() {
     const { isAuthenticated, userRole } = useAuth();
@@ -52,6 +53,7 @@ function Main() {
                     <Route exact path="/creator/detail/:id" element={<CreatorDetail />} />
                     <Route exact path="/lookbook" element={<Lookbook />} />
                     <Route exact path="/how-its-work" element={<Howitswork />} />
+                    <Route exact path="/404" element={<Page404 />} />
                     {isAuthenticated && userRole.includes('ROLE_USER') ? <Route exact path="/account" element={<Account />} /> : <Route exact path="/account" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_USER') ? <Route exact path="/orders" element={<Orders />} /> : <Route exact path="/account" element={<Navigate to="/login" />} />}
                     {isAuthenticated && userRole.includes('ROLE_CREATOR') ? <Route exact path="/creator_profil" element={<CreatorProfile />} /> : <Route exact path="/creator_profil" element={<Navigate to="/login" />} />}

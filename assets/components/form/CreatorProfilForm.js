@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-
-
+import { useNavigate } from "react-router-dom";
 
 export const CreatorProfilForm = () => {
+
+    const navigate = useNavigate();
 
     // Errors
     const [instagramError, setInstagramError] = useState('');
@@ -85,9 +86,14 @@ export const CreatorProfilForm = () => {
                 setBehance(user.behance);
             })
             .catch(error => {
-                console.log(error);
-                // localStorage.clear();
-                // window.location.pathname = "/";
+                if (error.response.status == 401) {
+                    Swal.close();
+                    localStorage.removeItem('token');
+                    navigate('/login')
+                } else {
+                    Swal.close();
+                    navigate('/404')
+                }
             });
     }, []);
 
@@ -130,16 +136,25 @@ export const CreatorProfilForm = () => {
                 resetErrors()
             })
             .catch((error) => {
-                console.log(error);
-                Swal.update({
-                    icon: 'error',
-                    title: 'erreur',
-                    showConfirmButton: false,
-                    timer: 2500
-                })
-                setTimeout(() => {
+                if (error.response.status == 401) {
                     Swal.close();
-                }, 1500);
+                    localStorage.removeItem('token');
+                    navigate('/login')
+                } else if (error.response.status == 404) {
+                    Swal.close();
+                    navigate('/404')
+                } else {
+                    Swal.update({
+                        icon: 'error',
+                        title: 'Form error',
+                        showConfirmButton: false,
+                        timer: 2500
+                    })
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
+                }
+
                 resetErrors()
                 setIsSaving(false)
             });
@@ -171,25 +186,25 @@ export const CreatorProfilForm = () => {
                 <h2>Social media</h2>
                 <div className="form-group">
                     <label>Instagram :</label>
-                    <input type="text" value={instagram} onChange={e => (setInstagram(e.target.value))} />
+                    <input type="text" value={instagram} onChange={e => (setInstagram(e.target.value))} placeholder="Instagram link" />
                     {instagramError && <span className="error">{instagramError}</span>}
                 </div>
                 <br />
                 <div className="form-group">
                     <label>Linkedin : </label>
-                    <input type="text" value={linkedin} onChange={e => (setLinkedin(e.target.value))} />
+                    <input type="text" value={linkedin} onChange={e => (setLinkedin(e.target.value))} placeholder="Linkedin link" />
                     {linkedinError && <span className="error">{linkedinError}</span>}
                 </div>
                 <br />
                 <div className="form-group">
                     <label>Dribble :</label>
-                    <input type="text" value={dribble} onChange={e => (setDribble(e.target.value))} />
+                    <input type="text" value={dribble} onChange={e => (setDribble(e.target.value))} placeholder="Dribble link" />
                     {dribbleError && <span className="error">{dribbleError}</span>}
                 </div>
                 <br />
                 <div className="form-group">
                     <label>Behance :</label>
-                    <input type="text" value={behance} onChange={e => (setBehance(e.target.value))} />
+                    <input type="text" value={behance} onChange={e => (setBehance(e.target.value))} placeholder="Behance link" />
                     {behanceError && <span className="error">{behanceError}</span>}
                 </div>
                 <br />

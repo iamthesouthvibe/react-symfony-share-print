@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { useNavigate } from "react-router-dom";
 
 export const CreatorSettingsForm = () => {
+
+    const navigate = useNavigate();
 
     // Errors
     const [firstnameError, setFirstnameError] = useState('');
@@ -107,9 +110,14 @@ export const CreatorSettingsForm = () => {
                 setPaypalEmail(user.paypalEmail);
             })
             .catch(error => {
-                console.log(error);
-                // localStorage.clear();
-                // window.location.pathname = "/";
+                if (error.response.status == 401) {
+                    Swal.close();
+                    localStorage.removeItem('token');
+                    navigate('/login')
+                } else {
+                    Swal.close();
+                    navigate('/404')
+                }
             });
     }, []);
 
@@ -152,13 +160,24 @@ export const CreatorSettingsForm = () => {
                 }, 1500);
             })
             .catch((error) => {
-                console.log(error);
-                Swal.update({
-                    icon: 'error',
-                    title: 'erreur',
-                    showConfirmButton: false,
-                    timer: 2500
-                })
+                if (error.response.status == 401) {
+                    Swal.close();
+                    localStorage.removeItem('token');
+                    navigate('/login')
+                } else if (error.response.status == 404) {
+                    Swal.close();
+                    navigate('/404')
+                } else {
+                    Swal.update({
+                        icon: 'error',
+                        title: 'Form error',
+                        showConfirmButton: false,
+                        timer: 2500
+                    })
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1500);
+                }
                 setIsSaving(false)
                 setTimeout(() => {
                     Swal.close();

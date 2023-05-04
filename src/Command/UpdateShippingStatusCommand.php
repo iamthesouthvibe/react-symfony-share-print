@@ -42,7 +42,7 @@ class UpdateShippingStatusCommand extends Command
                     'X-Okapi-Key' => 'X6jFC4xixceQ5sDT2JtzUfaF52Me8A5Xez8+fpAqv+/6rkigbBo2MVLAp2tFHt9Z',
                 ], ]);
                 $data = $response->toArray();
-                var_dump($data);
+
                 $currentStatus = $data['shipment']['event'];
                 $last_element = reset($currentStatus);
                 // var_dump($last_element);

@@ -74,16 +74,13 @@ export const ProfileChangePassword = () => {
                 }
             })
             .catch((error) => {
-                if (error.response.status === 404) {
-                    Swal.update({
-                        icon: 'error',
-                        title: error.response.data.error,
-                        showConfirmButton: false,
-                        timer: 2500
-                    })
-                    setTimeout(() => {
-                        Swal.close();
-                    }, 1500);
+                if (error.response.status == 401) {
+                    Swal.close();
+                    localStorage.removeItem('token');
+                    navigate('/login')
+                } else if (error.response.status == 401) {
+                    Swal.close();
+                    navigate('/404')
                 } else {
                     Swal.update({
                         icon: 'error',

@@ -12,6 +12,7 @@ const UsersList = () => {
     const [logs, setLogs] = useState([]);
     const [roles, setRoles] = useState([]);
     const [name, setName] = useState('');
+    const [emailUser, setEmailUser] = useState('')
     const [sortOrder, setSortOrder] = useState('asc');
     const [currentPage, setCurrentPage] = useState(1);
     const [usersPerPage] = useState(10);
@@ -119,7 +120,7 @@ const UsersList = () => {
 
     if (roles.length > 0 || name.length > 0 || sortOrder.length > 0) {
         filteredUsers = users.filter(user => {
-            const nameMatch = name.length === 0 || removeAccents(user.firstname).toLowerCase().includes(removeAccents(name.toLowerCase())) || removeAccents(user.lastname).toLowerCase().includes(removeAccents(name.toLowerCase())) || String(user.id).toLowerCase().includes(name);
+            const nameMatch = name.length === 0 || removeAccents(user.email).toLowerCase().includes(name.toLowerCase()) || String(user.id).toLowerCase().includes(name);
             const roleMatch = roles.length === 0 || user.roles.some(role => roles.includes(role));
 
             return nameMatch && roleMatch;
@@ -276,7 +277,7 @@ const UsersList = () => {
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Name</th>
+                        <th>Email</th>
                         <th>Roles</th>
                         <th>Created at</th>
                         <th>Updated at</th>
@@ -287,7 +288,7 @@ const UsersList = () => {
                     {currentUsers.map(user => (
                         <tr key={user.id}>
                             <td>{user.id}</td>
-                            <td>{user.firstname} {user.lastname}</td>
+                            <td>{user.email}</td>
                             <td>
                                 {user.roles.map(role => (
                                     role + ' '
