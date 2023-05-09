@@ -19,6 +19,13 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 class AdminCampagneController extends AbstractController
 {
+    /**
+     * Il s'agit d'une fonction qui renvoit la liste des campagnes.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/list/campagnes', name: 'app_list_campagnes')]
     public function getCampagnesList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -91,6 +98,12 @@ class AdminCampagneController extends AbstractController
     /**
      * downloadCampagneFile function
      * Télécharge le pdf d'une campagne.
+     *
+     * @param entityManagerInterface $em:          une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder:  une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:     une instance de la classe Request, qui contient des informations sur la requête HTTP
+     * @param string                 $id           : id de la campagne
+     * @param LogServices            $LogServices: une instance de la LogServicesclasse, utilisée pour la journalisation
      */
     #[Route('/api/admin/campagne/download/{id}', name: 'app_admin_campagne_download')]
     public function downloadCampagneFile(EntityManagerInterface $em, Request $request, string $id, JWTEncoderInterface $jwtEncoder, LogServices $logServices)
@@ -140,8 +153,15 @@ class AdminCampagneController extends AbstractController
         }
     }
 
+    /**
+     * Il s'agit d'une fonction qui affiche le détail d'une campagne.
+     *
+     * @param entityManagerInterface $em:      une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param                        $id:      id de la campagne
+     * @param request                $request: une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/campagne/detail/{id}', name: 'app_details_campagne')]
-    public function details(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $logServices)
+    public function details(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request)
     {
         $token = $request->headers->get('Authorization');
         $token = str_replace('Bearer ', '', $token);
@@ -236,6 +256,8 @@ class AdminCampagneController extends AbstractController
         $em->flush();
 
         $logServices->createCampagneLog($campagne, 'Campagne accepté', 'CAMPAGNE_CREATE');
+
+        // TODO:: Envoyer un email à l'utilisateur
 
         return new JsonResponse(['success' => 'Campagne accepté avec succés']);
     }

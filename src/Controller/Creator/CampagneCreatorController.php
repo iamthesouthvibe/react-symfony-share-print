@@ -23,6 +23,17 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 class CampagneCreatorController extends AbstractController
 {
+    /**
+     * Il s'agit d'une fonction qui crée une nouvelle campagne.
+     * Il a l'itinéraire /api/campagne/addet le nom app_campagne_add.
+     *
+     * @param entityManagerInterface $em:           une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder:   une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:      une instance de la classe Request, qui contient des informations sur la requête HTTP
+     * @param sluggerInterface       $slugger:      une instance de la SluggerInterfaceclasse, utilisée pour créer un slug à partir du nom de fichier du PDF téléchargé
+     * @param EmailService           $emailService: une instance de la EmailServiceclasse, utilisée pour envoyer des emails
+     * @param LogServices            $LogServices:  une instance de la LogServicesclasse, utilisée pour la journalisation
+     */
     #[Route('/api/campagne/add', name: 'app_campagne_add')]
     public function addCampagne(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request, SluggerInterface $slugger, EmailService $emailService, LogServices $LogServices)
     {
@@ -30,14 +41,15 @@ class CampagneCreatorController extends AbstractController
         $token = $request->headers->get('Authorization');
         $token = str_replace('Bearer ', '', $token);
 
+        // Récupère d'abord le JWT à partir de l'en-tête de la demande et le décode pour obtenir l'e-mail de l'utilisateur. Il récupère ensuite l'objet utilisateur de la base de données à l'aide de l'e-mail.
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
             return new JsonResponse(['error' => 'You should to be connect for post campagne'], 401);
         }
-
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
 
+        // Si l'utilisateur n'existe pas, la fonction renvoie une réponse d'erreur 404.
         if (!$user) {
             return new JsonResponse(['error' => 'You should to be connect for post campagne'], 404);
         }
@@ -52,7 +64,7 @@ class CampagneCreatorController extends AbstractController
         try {
             $campagne = new Campagne();
 
-            // Gestion du PDF
+            // Téléchargement d'un fichier PDF envoyé dans la demande vers un répertoire spécifié sur le serveur
             /** @var UploadedFile $uploadedFile */
             $fileSource = $request->files->get('file');
             $extension = pathinfo($fileSource->getClientOriginalName(), PATHINFO_EXTENSION);
@@ -62,7 +74,6 @@ class CampagneCreatorController extends AbstractController
             $newFilenamePdf = $newFilename.'.'.$extension;
             $newFilenamePng = $newFilename.'.png';
 
-            // init file system
             $fsObject = new Filesystem();
             $current_dir_path = getcwd();
             $new_dir_path = $this->getParameter('campagnes_dir').'/'.$user->getId();
@@ -71,7 +82,6 @@ class CampagneCreatorController extends AbstractController
                 $fsObject->mkdir($new_dir_path, 0775);
             }
 
-            // Move the file to the directory
             try {
                 $fileSource->move(
                     $new_dir_path,
@@ -83,7 +93,7 @@ class CampagneCreatorController extends AbstractController
 
             $campagne->setFileSource($newFilename);
 
-            // Convert PDF file to image
+            // Conversion du PDF en image PNG.
             $outputImagePath = $this->getParameter('campagnes_dir').'/'.$user->getId().'/'.$newFilenamePng;
             $pdf = new Pdf($new_dir_path.'/'.$newFilenamePdf);
             $pdf->setOutputFormat('png')
@@ -104,18 +114,15 @@ class CampagneCreatorController extends AbstractController
             }
             $campagne->setNumCommande($unique);
 
-            // Set weight
+            // Définition du poids, du style de papier et de la taille de la campagne.
             $weight = $em->getRepository(PaperWeight::class)->findOneBy(['weight' => $request->request->get('weight')], []);
             $campagne->setWeight($weight);
-
-            // Set style
             $paper = $em->getRepository(PaperStyle::class)->findOneBy(['name' => $request->request->get('paper')], []);
             $campagne->setPaper($paper);
-
-            // Set size
             $size = $em->getRepository(PaperSize::class)->findOneBy(['name' => $request->request->get('size')], []);
             $campagne->setSize($size);
 
+            // Fixer le prix de la campagne en fonction du poids et de la taille
             if ($request->request->get('weight') == '130') {
                 if ($request->request->get('size') == 'A2') {
                     $pricePrint = 6;
@@ -134,6 +141,7 @@ class CampagneCreatorController extends AbstractController
                 }
             }
 
+            // Définir le nom, la description, la taxe totale, le prix après taxe et le statut de la campagne etc..
             $campagne->setPricePrint($pricePrint);
             $campagne->setNameProject($request->request->get('projectName'));
             $campagne->setPrice($request->request->get('price'));
@@ -160,6 +168,8 @@ class CampagneCreatorController extends AbstractController
         $LogServices->createLog($user, 'Une nouvelle campagne '.$campagne->getId().' a été crée par '.$user->getEmail(), 'CAMPAGNE');
         $LogServices->createCampagneLog($campagne, 'Campagne crée', 'CAMPAGNE_CREATE');
 
+        // Email
+        // TODO:: REVOIR LES EMAILS ET LES TEMPLATES
         $emailService->sendEmail(
             'emails/template.html.twig',
             [
@@ -178,25 +188,34 @@ class CampagneCreatorController extends AbstractController
         return new JsonResponse(['message' => 'Campagne add successfully'], 201);
     }
 
+    /**
+     * Il s'agit d'une fonction qui affiche la liste des campagnes pour un créateur.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/account/campagne/list', name: 'app_campagne_account_list')]
-    public function campagneList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request, SluggerInterface $slugger, EmailService $emailService, LogServices $LogServices)
+    public function campagneList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
         /* DATA */
         $token = $request->headers->get('Authorization');
         $token = str_replace('Bearer ', '', $token);
 
+        // Récupère d'abord le JWT à partir de l'en-tête de la demande et le décode pour obtenir l'e-mail de l'utilisateur. Il récupère ensuite l'objet utilisateur de la base de données à l'aide de l'e-mail.
         try {
             $data = $jwtEncoder->decode($token);
         } catch (JWTDecodeFailureException $e) {
             return new JsonResponse(['error' => 'You should to be connect for post campagne'], 401);
         }
-
         $user = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
 
+        // Si l'utilisateur n'existe pas, la fonction renvoie une réponse d'erreur 404.
         if (!$user) {
             return new JsonResponse(['error' => 'You should to be connect for post campagne'], 404);
         }
 
+        // Récupère les campagnes en fonction de l'utilisateur connecté
         $campagnes = $em->getRepository(Campagne::class)->findBy(['user' => $user]);
 
         $data = [];
@@ -240,6 +259,13 @@ class CampagneCreatorController extends AbstractController
         return new JsonResponse(['campagnes' => array_reverse($data)], 201);
     }
 
+    /**
+     * Il s'agit d'une fonction qui affiche le détail d'un profil créateur.
+     *
+     * @param entityManagerInterface $em:      une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param                        $id:      id du creator
+     * @param request                $request: une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/creator/detail/{id}', name: 'app_creator_detail')]
     public function getCreatorDetail(EntityManagerInterface $em, string $id, Request $request)
     {
@@ -253,6 +279,10 @@ class CampagneCreatorController extends AbstractController
 
         $campagnesData = [];
         foreach ($campagnes as $c) {
+            $createdAt = ($c->getCreatedAt() !== null) ? $c->getCreatedAt()->format('Y-m-d') : '';
+            $today = date('Y-m-d');
+            $diff = abs(strtotime($today) - strtotime($createdAt));
+            $days = floor($diff / (60 * 60 * 24));
             $campagnesData[] = [
                     'id' => $c->getId(),
                     'userid' => $c->getUser()->getId(),
@@ -262,6 +292,7 @@ class CampagneCreatorController extends AbstractController
                     'fileSource' => $c->getFileSource().'.png',
                     'filename' => $c->getFileSource(),
                     'price' => $c->getPriceAti(),
+                    'days' => $days,
                 ];
         }
         // Filtrer les campagnes en fonction du statut

@@ -625,7 +625,8 @@ a {
 
 .page-card-form-left .form-group .error,
 .page-card-form-right .form-group .error,
-.page-account .form-group .error {
+.page-account .form-group .error,
+.form-group-textarea .error {
   font-size: 0.7rem;
   color: #d64d4d;
 }

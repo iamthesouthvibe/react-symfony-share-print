@@ -186,7 +186,7 @@ const Card = () => {
         }
         const customerData = [firstname, lastname, country, address, zip, city, mobile, email];
         calculateTotalPrice();
-        console.log(totalPrice);
+
         axios.post('/api/card/checkout', { cartItems, customerData, totalPrice })
             .then(response => {
                 const { checkout_session_id } = response.data;

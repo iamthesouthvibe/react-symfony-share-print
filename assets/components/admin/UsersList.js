@@ -98,15 +98,23 @@ const UsersList = () => {
                                 icon: 'success',
                                 title: 'User delete successful',
                                 showConfirmButton: false,
-                                timer: 1500
                             })
-
+                            setTimeout(() => {
+                                Swal.close();
+                            }, 1500);
                             fetchData();
                         })
                         .catch(error => {
                             console.log(error);
-                            // localStorage.clear();
-                            // window.location.pathname = "/";
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'User delete error',
+                                showConfirmButton: false,
+                            })
+                            setTimeout(() => {
+                                Swal.close();
+                            }, 1500);
+                            fetchData();
                         });
                 }
             });
@@ -137,8 +145,61 @@ const UsersList = () => {
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-
     // Form new and update user
+    const [firstnameError, setFirstnameError] = useState('');
+    const [lastnameError, setLastnameError] = useState('');
+    const [emailError, setEmailError] = useState(null);
+    const [passwordError, setPasswordError] = useState('');
+    const [roleError, setRoleError] = useState('')
+
+    const resetErrors = () => {
+        setFirstnameError(null);
+        setLastnameError(null);
+        setEmailError(null)
+        setPasswordError(null)
+        setRoleError(null)
+    };
+
+    const validateEmail = (email) => {
+        const regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return regex.test(email);
+    };
+
+    const validateCustomerData = () => {
+        const errors = {};
+        const regex = /^[a-zA-ZÀ-ÿ ]+$/;
+
+        if (firstname && (typeof firstname !== 'string' || !firstname.trim() || !regex.test(firstname))) {
+            errors.firstname = 'Le prénom doit être une chaîne de caractères';
+            setFirstnameError(errors.firstname);
+        }
+        if (lastname && (typeof lastname !== 'string' || !lastname.trim() || !regex.test(lastname))) {
+            errors.lastname = 'Le nom doit être une chaîne de caractères';
+            setLastnameError(errors.lastname);
+        }
+
+        if (typeof email !== 'string' || !email.trim() || !validateEmail(email)) {
+            errors.email = 'L\'adresse e-mail n\'est pas valide';
+            setEmailError(errors.email);
+        }
+
+        if (!password) {
+            errors.password = 'Le mot de passe ne peut pas être vide';
+            setPasswordError(errors.password);
+        } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
+            errors.password =
+                "Le mot de passe doit contenir au moins un chiffre et faire plus de 8 caractères";
+            setPasswordError(errors.password);
+        }
+
+        if (typeof role !== 'string' || !role.trim()) {
+            errors.role = 'Le role doit être une chaîne de caractères';
+            setRoleError(errors.role);
+        }
+
+        return Object.keys(errors).length ? errors : null;
+    };
+
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
     const [email, setEmail] = useState('');
@@ -149,6 +210,12 @@ const UsersList = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        resetErrors();
+        const errors = validateCustomerData();
+        if (errors) {
+            // Si des erreurs sont présentes, les afficher sous les inputs correspondants
+            return;
+        }
         setIsSaving(true);
         let formData = new FormData()
         formData.append("firstname", firstname)
@@ -157,17 +224,17 @@ const UsersList = () => {
         formData.append("password", password)
         formData.append("role", role)
 
+        Swal.showLoading();
         axios.post(`/api/admin/add/user/${id}`, formData, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
             },
         })
             .then((response) => {
-                Swal.fire({
+                Swal.update({
                     icon: 'success',
                     title: response.data.message,
                     showConfirmButton: false,
-                    timer: 1500
                 })
                 setIsSaving(false);
                 fetchData();
@@ -177,18 +244,23 @@ const UsersList = () => {
                 setEmail('')
                 setPassword('')
                 setRole('')
+                setTimeout(() => {
+                    Swal.close();
+                }, 1500);
 
             })
             .catch((error) => {
                 console.log(error);
-                Swal.fire({
+                Swal.update({
                     icon: 'error',
                     title: 'erreur',
                     showConfirmButton: false,
-                    timer: 2500
                 })
                 setIsSaving(false)
                 setShowModal(false);
+                setTimeout(() => {
+                    Swal.close();
+                }, 1500);
             });
     }
 
@@ -334,49 +406,63 @@ const UsersList = () => {
                     <div style={styles.modalContainer}>
                         <div>
                             <h3>Ajouter un nouvel utilisateur</h3>
-                            <form>
+                            <br />
+                            <form style={styles.form}>
                                 <div style={styles.flex}>
-                                    <label>
-                                        prénom : <br />
-                                        <input type="text" style={styles.input} value={lastname} onChange={e => (setLastname(e.target.value))} />
-                                    </label>
-                                    <br />
-                                    <label>
-                                        Nom : <br />
-                                        <input type="text" style={styles.input} value={firstname} onChange={e => (setFirstname(e.target.value))} />
-                                    </label>
+                                    <div style={styles.formGroup}>
+                                        <label>Nom</label>
+                                        <input type="text" style={{ ...styles.input, ...styles.inputForm }} value={lastname} onChange={e => (setLastname(e.target.value))} placeholder="Nom " />
+                                        {lastnameError && <span className="error" style={{ ...styles.inputError }}>{lastnameError}</span>}
+                                    </div>
+                                    <div style={styles.formGroup}>
+                                        <label>Prénom</label>
+                                        <input type="text" style={{ ...styles.input, ...styles.inputForm }} value={firstname} onChange={e => (setFirstname(e.target.value))} placeholder="Prénom" />
+                                        {firstnameError && <span className="error" style={{ ...styles.inputError }}>{firstnameError}</span>}
+                                    </div>
+                                </div>
+
+                                <div style={styles.flex}>
+                                    <div style={styles.formGroup}>
+                                        <label>Adresse e-mail </label>
+                                        <input type="email" style={{ ...styles.input, ...styles.inputForm }} value={email} onChange={e => (setEmail(e.target.value))} placeholder="Email" />
+                                        {emailError && <span className="error" style={{ ...styles.inputError }}>{emailError}</span>}
+                                    </div>
+                                    <div style={styles.formGroup}>
+                                        <label>Password </label>
+                                        <input type="password" style={{ ...styles.input, ...styles.inputForm }} value={password} onChange={e => (setPassword(e.target.value))} placeholder="Password" />
+                                        {passwordError && <span className="error" style={{ ...styles.inputError }}>{passwordError}</span>}
+                                    </div>
+                                </div>
+
+                                <div style={styles.flex}>
+                                    <div style={styles.formGroup}>
+                                        <label>
+                                            Roles</label>
+                                        <select name="role" style={{ ...styles.input, ...styles.inputForm }} value={role} onChange={e => (setRole(e.target.value))}>
+                                            <option value="">Choisir un rôle</option>
+                                            <option value="ROLE_USER">User</option>
+                                            <option value="ROLE_CREATOR">Creator</option>
+                                            <option value="ROLE_ADMIN">Admin</option>
+                                        </select>
+                                        {roleError && <span className="error" style={{ ...styles.inputError }}>{roleError}</span>}
+                                    </div>
+                                    <div style={styles.formGroup}>
+
+                                    </div>
                                 </div>
 
                                 <br />
                                 <div style={styles.flex}>
-                                    <label>
-                                        Adresse e-mail :<br />
-                                        <input type="email" style={styles.input} value={email} onChange={e => (setEmail(e.target.value))} />
-                                    </label>
-                                    <br />
-                                    <label>
-                                        Password :<br />
-                                        <input type="password" style={styles.input} value={password} onChange={e => (setPassword(e.target.value))} />
-                                    </label>
+                                    <button type="submit" style={{ ...styles.input, ...styles.inputForm }} onClick={handleSubmit}>Ajouter</button>
+                                    <button onClick={() => {
+                                        setFirstname('');
+                                        setLastname('');
+                                        setEmail('')
+                                        setId(null);
+                                        handleCloseModal();
+                                        resetErrors();
+                                    }} style={{ ...styles.input, ...styles.inputForm }}>Annuler</button>
                                 </div>
-                                <br />
-                                <label>
-                                    Roles :<br />
-                                    <select name="role" style={styles.input} value={role} onChange={e => (setRole(e.target.value))}>
-                                        <option value="ROLE_USER">User</option>
-                                        <option value="ROLE_CREATOR">Creator</option>
-                                        <option value="ROLE_ADMIN">Admin</option>
-                                    </select>
-                                </label>
-                                <br />
-                                <button type="submit" style={styles.input} onClick={handleSubmit}>Ajouter</button>
-                                <button onClick={() => {
-                                    setFirstname('');
-                                    setLastname('');
-                                    setEmail('')
-                                    setId(null);
-                                    handleCloseModal();
-                                }} style={styles.input}>Annuler</button>
                             </form>
                         </div>
                     </div>
@@ -408,27 +494,28 @@ const UsersList = () => {
                     <div style={styles.modalContainer}>
                         <div>
                             <h3>Envoyer un email</h3>
-                            <form>
+                            <br />
+                            <form style={styles.form}>
                                 <div style={styles.flex}>
-                                    <label>
-                                        Objet du mail : <br />
-                                        <input type="text" style={styles.input} value={object} onChange={e => (setObject(e.target.value))} />
-                                    </label>
-                                    <br />
-                                    <label>
-                                        Message : <br />
-                                        <input type="text" style={styles.input} value={content} onChange={e => (setContent(e.target.value))} />
-                                    </label>
+                                    <div style={styles.formGroup}>
+                                        <label style={styles.label}>Objet du mail : <br /> </label>
+                                        <input type="text" style={{ ...styles.input, ...styles.inputForm }} value={object} onChange={e => (setObject(e.target.value))} />
+                                    </div>
+                                </div>
+                                <div style={styles.formGroup}>
+                                    <label style={styles.label}>Message</label>
+                                    <textarea style={{ ...styles.input, ...styles.inputForm, ...styles.textArea }} value={content} onChange={e => (setContent(e.target.value))} />
                                 </div>
 
-                                <br />
-                                <button type="submit" style={styles.input} onClick={handleSubmitEmail}>Envoyer</button>
-                                <button onClick={() => {
-                                    setContent('');
-                                    setObject('')
-                                    setId(null);
-                                    handleCloseModalEmail();
-                                }} style={styles.input}>Annuler</button>
+                                <div style={styles.flex}>
+                                    <button type="submit" style={styles.input} onClick={handleSubmitEmail}>Envoyer</button>
+                                    <button onClick={() => {
+                                        setContent('');
+                                        setObject('')
+                                        setId(null);
+                                        handleCloseModalEmail();
+                                    }} style={styles.input}>Annuler</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -454,7 +541,7 @@ const styles = {
         borderRadius: '0.4rem',
         fontSize: '0.8rem',
         padding: '0.5rem',
-        margin: '0.5rem 0'
+        margin: '0.1rem 0'
     },
     filtreContainer: {
         display: 'flex',
@@ -473,16 +560,42 @@ const styles = {
         borderRadius: '0.4rem',
         height: '400px',
         width: '550px',
-        zIndex: '20'
+        zIndex: '20',
+        padding: '20px'
     },
     flex: {
         display: 'flex',
-        gap: '20px'
+        gap: '10px'
+    },
+    form: {
+        display: 'flex',
+        flexDirection: 'column',
+        rowGap: '15px'
     },
     modalContainerContent: {
         height: '320px',
         overflow: 'scroll',
         padding: '25px'
+    },
+    formGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%'
+    },
+    inputForm: {
+        width: '90%'
+    },
+    inputError: {
+        fontSize: '0.7rem',
+        color: '#d64d4d'
+    },
+    textArea: {
+        width: '95%',
+        height: '170px'
+    },
+    label: {
+        fontSize: '0.9rem',
+        color: 'grey'
     }
 }
 
