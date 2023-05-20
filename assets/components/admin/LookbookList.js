@@ -37,11 +37,16 @@ const LookbookList = () => {
         setShowModal(!showModal);
     };
 
-    const [file, setFile] = useState('');
+    const [file, setFile] = useState(false);
+    const [fileError, setFileError] = useState('')
     const [isSaving, setIsSaving] = useState(false)
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!file) {
+            setFileError('Le champ file ne peut pas etre vide');
+            return;
+        }
         setIsSaving(true);
         let formData = new FormData()
 
@@ -62,6 +67,7 @@ const LookbookList = () => {
                 setIsSaving(false);
                 handleShowModal()
                 fetchData()
+                setFileError('');
             })
             .catch((error) => {
                 console.log(error);
@@ -74,6 +80,7 @@ const LookbookList = () => {
                 setIsSaving(false)
                 handleShowModal()
                 fetchData()
+                setFileError('');
             });
     };
 
@@ -82,7 +89,7 @@ const LookbookList = () => {
     return (
         <div>
             <div style={styles.filtreContainer}>
-                <button style={styles.input} onClick={handleShowModal}>Ajouter un nouveau lookbook</button>
+                <button style={{ ...styles.input, ...styles.buttonPrimary }} onClick={handleShowModal}>Ajouter un nouveau lookbook</button>
             </div>
 
             <table>
@@ -109,21 +116,22 @@ const LookbookList = () => {
                     <div style={styles.modalContainer}>
                         <div>
                             <h3>Ajouter un nouveau lookbook</h3>
+                            <br />
                             <form>
-                                <div style={styles.flex}>
-                                    <label>
-                                        Fichier : <br />
-                                        <input type="file" accept="application/png" onChange={e => (setFile(e.target.files[0]))} />
-                                    </label>
-                                    <br />
+                                <div style={styles.formGroup}>
+                                    <label>Fichier</label>
+                                    <input type="file" accept="application/png" onChange={e => (setFile(e.target.files[0]))} />
+                                    {fileError && <span className="error" style={{ ...styles.inputError }}>{fileError}</span>}
                                 </div>
 
                                 <br />
-                                <button type="submit" style={styles.input} disabled={isSaving} onClick={handleSubmit}>Envoyer</button>
-                                <button onClick={() => {
-                                    setFile('');
-                                    handleShowModal();
-                                }} style={styles.input}>Annuler</button>
+                                <div style={styles.flex}>
+                                    <button type="submit" style={{ ...styles.input, ...styles.buttonPrimary }} disabled={isSaving} onClick={handleSubmit}>Envoyer</button>
+                                    <button onClick={() => {
+                                        setFile('');
+                                        handleShowModal();
+                                    }} style={styles.input}>Annuler</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -160,7 +168,8 @@ const styles = {
         borderRadius: '0.4rem',
         height: '400px',
         width: '550px',
-        zIndex: '20'
+        zIndex: '20',
+        padding: '20px'
     },
     flex: {
         display: 'flex',
@@ -174,6 +183,19 @@ const styles = {
     img: {
         width: '80px',
         // padding: '10px'
+    },
+    formGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        rowGap: '0px'
+    },
+    buttonPrimary: {
+        backgroundColor: 'rgb(245, 78, 49)',
+        color: '#fff'
+    },
+    inputError: {
+        fontSize: '0.7rem',
+        color: '#d64d4d'
     }
 }
 

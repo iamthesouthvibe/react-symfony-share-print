@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Document</title>
+		<style>
+			body {
+				font-family: Helvetica;
+			}
+
+			p,
+			h5 {
+				margin: 0;
+			}
+
+			.campagnesContainer {
+				display: flex;
+				gap: 20px;
+				align-items: flex-start;
+			}
+
+			.campagnesContainer img {
+				max-width: 150px;
+			}
+
+			.bg {
+				background-color: #000;
+				color: #fff;
+				width: fit-content;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Shareprint</h1>
+		<h2 class="bg">Your campaign has been successfully accepted!</h2>
+		<p>Hello
+			{{ campagne.user.firstName }}
+			{{ campagne.user.lastName }}, your campaign has been successfully submitted. You will receive a confirmation email when your product is online</p>
+		<br>
+
+		<h4>Your campaign :</h4>
+		<div class="campagnesContainer">
+			<div>
+				<img src="http://127.0.0.1:8000/images/campagnes/{{ campagne.user.id ~ '/' ~ campagne.fileSource }}.png" alt="" srcset="">
+			</div>
+			<div>
+				<h5>{{ campagne.nameProject }}</h5>
+				<p>Weight :
+					{{ campagne.weight.weight }}</p>
+				<p>Size :
+					{{ campagne.size.name }}</p>
+				<p>Paper :
+					{{ campagne.paper.name }}</p>
+			</div>
+			<br/>
+		</div>
+		<br>
+	</body>
+</html>

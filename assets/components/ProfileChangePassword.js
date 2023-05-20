@@ -15,17 +15,17 @@ export const ProfileChangePassword = () => {
     const validateCustomerData = () => {
         const errors = {};
         if (!password) {
-            errors.password = 'Le mot de passe ne peut pas être vide';
+            errors.password = 'Password cannot be empty';
             setPasswordError(errors.password);
         } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
             errors.password =
-                "Le mot de passe doit contenir au moins un chiffre et faire plus de 8 caractères";
+                "Password must contain at least one number and be more than 8 characters long";
             setPasswordError(errors.password);
         }
 
         if (password !== confirmPassword) {
             errors.confirmPassword =
-                "Le mot de passe n'est pas identique";
+                "Password is not identical";
             setErrorMessageConfirmPassword(errors.confirmPassword)
         }
 

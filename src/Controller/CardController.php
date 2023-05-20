@@ -233,7 +233,7 @@ class CardController extends AbstractController
                     'createdAt' => $order->getCreatedAt()->format('Y-m-d'),
                 ],
                 $session->metadata->email,
-                'Merci pour votre commande !'
+                'Thank you for your order !'
             );
 
                 return new JsonResponse(['success' => 'Your order has been successfully completed!
@@ -246,12 +246,12 @@ class CardController extends AbstractController
                 $emailService->sendEmail(
                     'emails/success-payment.html.twig',
                     [
-                        'name' => 'Paiement échoué ',
+                        'name' => 'Payment failed ',
                         'campagneOrders' => '',
                         'createdAt' => $order->getCreatedAt()->format('Y-m-d'),
                     ],
                     $session->metadata->email,
-                    'Merci pour votre commande !'
+                    'Payment failed !'
                 );
                 // Paiement échoué ou en attente
                 return new JsonResponse(['error' => 'Failed or pending payment'], 404);

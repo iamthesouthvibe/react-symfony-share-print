@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 import { Document, Page } from 'react-pdf';
 import { CartContext } from '../../contexts/CartContext';
-import Layout from "../Layout"
 import { useNavigate } from 'react-router-dom';
 
 export const CampagneForm = () => {
@@ -40,6 +39,7 @@ export const CampagneForm = () => {
         setFileError(null);
         setSizeError(null)
         setPaperError(null)
+        setWeightError(null)
     };
 
     const [priceError, setPriceError] = useState('')
@@ -48,6 +48,7 @@ export const CampagneForm = () => {
     const [fileError, setFileError] = useState('')
     const [sizeError, setSizeError] = useState('')
     const [paperError, setPaperError] = useState('')
+    const [weightError, setWeightError] = useState('')
 
     const validateCustomerData = () => {
         const errors = {};
@@ -57,38 +58,43 @@ export const CampagneForm = () => {
         const fileExtension = file.type;
 
         if (typeof projectName !== 'string' || !projectName.trim() || !regex.test(projectName)) {
-            errors.projectName = 'Le prénom doit être une chaîne de caractères et ne peux pas etre vide';
+            errors.projectName = 'The field must be a string and cannot be empty';
             setProjectNamerror(errors.projectName);
         }
 
         if (typeof description !== 'string' || !description.trim() || !regex.test(description)) {
-            errors.description = 'Le prénom doit être une chaîne de caractères et ne peux pas etre vide';
+            errors.description = 'The field must be a string and cannot be empty';
             setDescriptionError(errors.description);
         }
 
         if (typeof price !== 'string' || !price.trim() || !regexPrice.test(price)) {
-            errors.price = 'Le code postal doit être composé uniquement de chiffres';
+            errors.price = 'The price must be composed of numbers only';
             setPriceError(errors.price);
         } else if (price < 35) {
-            errors.price = 'Le prix ne peux pas etre inférieur à 35';
+            errors.price = 'Price cannot be less than 35';
             setPriceError(errors.price);
         }
 
         if (size !== 'A4' && size !== 'A3' && size !== 'A2') {
-            errors.size = 'Veuillez choisir une taille';
+            errors.size = 'Please choose a size';
             setSizeError(errors.size);
         }
 
         if (paper !== 'Couché' && paper !== 'Non couché') {
-            errors.paper = 'Veuillez choisir un type de papier';
+            errors.paper = 'Please choose a paper type';
             setPaperError(errors.paper);
         }
 
+        if (weight !== '130' && weight !== '160') {
+            errors.weight = 'Please choose a paper type';
+            setWeightError(errors.weight);
+        }
+
         if (!file) {
-            errors.file = 'Le champ file ne peut pas etre vide';
+            errors.file = 'File field cannot be empty';
             setFileError(errors.file);
         } else if (!acceptedFileTypes.includes(fileExtension)) {
-            errors.file = 'Le fichier sélectionné n\'est pas un PDF. Veuillez sélectionner un fichier PDF.';
+            errors.file = 'The selected file is not a PDF. Please select a PDF file.';
             setFileError(errors.file);
         }
 
@@ -160,16 +166,16 @@ export const CampagneForm = () => {
                 if (error.response.status == 401 || error.response.status == 404) {
                     Swal.update({
                         icon: 'warning',
-                        title: 'Vous devez etre connecté pour soumettre une création',
+                        title: 'You must be logged in to submit a design',
                         html:
-                            'Vous devez etre connecté pour soumettre une création, ' +
-                            '<a href="http://127.0.0.1:8000/login">Se connecter</a>',
+                            'You must be logged in to submit a design, ' +
+                            '<a href="http://127.0.0.1:8000/login">Login</a>',
                         showConfirmButton: false,
-                        timer: 5500
+                        timer: 10000
                     })
                     setTimeout(() => {
                         Swal.close();
-                    }, 1500);
+                    }, 10000);
                 } else if (error.response.status == 500) {
                     Swal.update({
                         icon: 'error',
@@ -240,6 +246,7 @@ export const CampagneForm = () => {
                                             <option value="130" >130GR</option>
                                             <option value="160" >160GR</option>
                                         </select>
+                                        {weightError && <span className="error">{weightError}</span>}
                                     </div>
                                     <br />
                                     <div className="form-group">

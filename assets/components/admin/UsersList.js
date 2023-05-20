@@ -5,6 +5,7 @@ import Pagination from './Pagination';
 import Swal from 'sweetalert2';
 import iconActions from '../../images/icon-actions.svg';
 import { Link } from 'react-router-dom';
+import ReactPaginate from "react-paginate";
 
 const UsersList = () => {
 
@@ -15,7 +16,7 @@ const UsersList = () => {
     const [emailUser, setEmailUser] = useState('')
     const [sortOrder, setSortOrder] = useState('asc');
     const [currentPage, setCurrentPage] = useState(1);
-    const [usersPerPage] = useState(10);
+    const [usersPerPage] = useState(15);
 
     const [selectedUserId, setSelectedUserId] = useState(null);
 
@@ -55,9 +56,13 @@ const UsersList = () => {
         setSortOrder(event.target.value);
     };
 
-    const handlePageChange = pageNumber => {
-        setCurrentPage(pageNumber);
+    const handlePageChange = (data) => {
+        setCurrentPage(data.selected + 1);
     };
+
+    // const handlePageClick = (data) => {
+    //     setCurrentPage(data.selected + 1);
+    // };
 
     const handleOpen = () => {
         setOpen(!open)
@@ -88,7 +93,7 @@ const UsersList = () => {
         })
             .then((confirmation) => {
                 if (confirmation.value) {
-                    axios.get(`/api/admin/user/delete/${dataId}`, {
+                    axios.delete(`/api/admin/user/delete/${dataId}`, {
                         headers: {
                             'Authorization': 'Bearer ' + localStorage.getItem('token'),
                         },
@@ -178,21 +183,18 @@ const UsersList = () => {
             setLastnameError(errors.lastname);
         }
 
-        if (typeof email !== 'string' || !email.trim() || !validateEmail(email)) {
+        if (email && (typeof email !== 'string' || !email.trim() || !validateEmail(email))) {
             errors.email = 'L\'adresse e-mail n\'est pas valide';
             setEmailError(errors.email);
         }
 
-        if (!password) {
-            errors.password = 'Le mot de passe ne peut pas être vide';
-            setPasswordError(errors.password);
-        } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
+        if (password && (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password))) {
             errors.password =
                 "Le mot de passe doit contenir au moins un chiffre et faire plus de 8 caractères";
             setPasswordError(errors.password);
         }
 
-        if (typeof role !== 'string' || !role.trim()) {
+        if (role && (typeof role !== 'string' || !role.trim())) {
             errors.role = 'Le role doit être une chaîne de caractères';
             setRoleError(errors.role);
         }
@@ -282,6 +284,7 @@ const UsersList = () => {
     const [iduser, setIduser] = useState(null)
     const [showModalEmail, setShowModalEmail] = useState(false);
     const [isSavingEmail, setIsSavingEmail] = useState(false);
+    const [emailSendError, setEmailSendError] = useState(false);
 
     const handleShowModalEmail = () => {
         setShowModalEmail(true);
@@ -293,6 +296,10 @@ const UsersList = () => {
 
     const handleSubmitEmail = (e) => {
         e.preventDefault();
+        if (!content) {
+            setEmailSendError('Erreur le message ne peut pas etre vide')
+            return;
+        }
         setIsSavingEmail(true);
         let formData = new FormData()
         formData.append("content", content)
@@ -342,7 +349,7 @@ const UsersList = () => {
                     <option value="asc">Ascending</option>
                     <option value="desc">Descending</option>
                 </select>
-                <button style={styles.input} onClick={handleShowModal}>Ajouter un nouvel utilisateur</button>
+                <button style={{ ...styles.input, ...styles.buttonPrimary }} onClick={handleShowModal}>Ajouter un nouveau utilisateur</button>
             </div>
 
             <table>
@@ -401,6 +408,18 @@ const UsersList = () => {
                 </tbody>
             </table>
 
+            <ReactPaginate
+                breakLabel="..."
+                nextLabel="next >"
+                onPageChange={handlePageChange}
+                pageRangeDisplayed={5}
+                pageCount={Math.ceil(filteredUsers.length / usersPerPage)}
+                previousLabel="< previous"
+                renderOnZeroPageCount={null}
+                containerClassName="pagination"
+                activeClassName="active"
+            />
+
             {
                 showModal && (
                     <div style={styles.modalContainer}>
@@ -453,7 +472,7 @@ const UsersList = () => {
 
                                 <br />
                                 <div style={styles.flex}>
-                                    <button type="submit" style={{ ...styles.input, ...styles.inputForm }} onClick={handleSubmit}>Ajouter</button>
+                                    <button type="submit" style={{ ...styles.input, ...styles.inputForm, ...styles.buttonPrimary }} onClick={handleSubmit}>Ajouter</button>
                                     <button onClick={() => {
                                         setFirstname('');
                                         setLastname('');
@@ -477,10 +496,12 @@ const UsersList = () => {
                         <div style={styles.modalContainerContent}>
                             {allLogsByUsers.length > 0 ? allLogsByUsers.map(loge => (
                                 <>
-                                    <p key={loge.userId}>{loge.userId}</p>
-                                    <p>{loge.logId}</p>
-                                    <p>{loge.message}</p>
-                                    <p>{loge.code}</p>
+                                    <div key={loge.logId} style={styles.modalContainerContentInside}>
+                                        <p>#{loge.logId}</p>
+                                        <p>{loge.message}</p>
+                                        <p>CODE_{loge.code}</p>
+                                    </div>
+                                    <br />
                                 </>
                             )) : <p>Pas de logs</p>}
                         </div>
@@ -505,10 +526,11 @@ const UsersList = () => {
                                 <div style={styles.formGroup}>
                                     <label style={styles.label}>Message</label>
                                     <textarea style={{ ...styles.input, ...styles.inputForm, ...styles.textArea }} value={content} onChange={e => (setContent(e.target.value))} />
+                                    {emailSendError && <span className="error" style={{ ...styles.inputError }}>{emailSendError}</span>}
                                 </div>
 
                                 <div style={styles.flex}>
-                                    <button type="submit" style={styles.input} onClick={handleSubmitEmail}>Envoyer</button>
+                                    <button type="submit" style={{ ...styles.input, ...styles.buttonPrimary }} onClick={handleSubmitEmail}>Envoyer</button>
                                     <button onClick={() => {
                                         setContent('');
                                         setObject('')
@@ -522,12 +544,13 @@ const UsersList = () => {
                 )
             }
 
-            <Pagination
+            {/* <Pagination
                 usersPerPage={usersPerPage}
                 totalUsers={filteredUsers.length}
                 currentPage={currentPage}
                 handlePageChange={handlePageChange}
-            />
+            /> */}
+
         </div >
 
     )
@@ -575,7 +598,7 @@ const styles = {
     modalContainerContent: {
         height: '320px',
         overflow: 'scroll',
-        padding: '25px'
+        marginTop: '15px'
     },
     formGroup: {
         display: 'flex',
@@ -596,6 +619,15 @@ const styles = {
     label: {
         fontSize: '0.9rem',
         color: 'grey'
+    },
+    buttonPrimary: {
+        backgroundColor: 'rgb(245, 78, 49)',
+        color: '#fff'
+    },
+    modalContainerContentInside: {
+        backgroundColor: '#f0f0f1',
+        padding: '10px',
+        borderRadius: '10px'
     }
 }
 

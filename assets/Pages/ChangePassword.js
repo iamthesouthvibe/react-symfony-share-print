@@ -19,10 +19,10 @@ export const ChangePassword = () => {
     const validateCustomerData = () => {
         const errors = {};
         if (!email) {
-            errors.email = 'L\'adresse e-mail ne peut pas être vide';
+            errors.email = 'Email address cannot be empty';
             setEmailError(errors.email);
         } else if (typeof email !== 'string' || !email.trim() || !validateEmail(email)) {
-            errors.email = 'L\'adresse e-mail n\'est pas valide';
+            errors.email = 'The email address is invalid';
             setEmailError(errors.email);
         }
 

@@ -11,15 +11,15 @@ const HeaderAccount = () => {
             <div className="account-header">
                 {isAuthenticated && userRole.includes('ROLE_USER') && (
                     <>
-                        <Link to="/account">Profil</Link>
+                        <Link to="/account">Profile</Link>
                         <Link to="/orders">Orders</Link>
                     </>
                 )}
                 {isAuthenticated && userRole.includes('ROLE_CREATOR') && (
                     <>
-                        <Link to="/creator_profil">Creator profil</Link>
+                        <Link to="/creator_profil">Creator profile</Link>
                         <Link to="/creator_settings">Creator settings</Link>
-                        <Link to="/creator_campagnes">Campagnes</Link>
+                        <Link to="/creator_campagnes">Campaigns</Link>
                     </>
                 )}
             </div>

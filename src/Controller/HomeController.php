@@ -15,6 +15,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController
 {
+    /**
+     * Il s'agit d'une fonction qui permet d'afficher une liste des 5 dernieres campagnes ajoutées.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/list/home/last', name: 'app_home_last')]
     public function lastProducts(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request): Response
     {
@@ -46,6 +53,13 @@ class HomeController extends AbstractController
         return new JsonResponse(['campagnes' => array_reverse($data)]);
     }
 
+    /**
+     * Il s'agit d'une fonction qui permet d'afficher une liste des 5 dernieres campagnes bestseller.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/list/home/best', name: 'app_home_best')]
     public function bestSellers(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request): Response
     {
@@ -77,6 +91,13 @@ class HomeController extends AbstractController
         return new JsonResponse(['campagnes' => array_reverse($data)]);
     }
 
+    /**
+     * Il s'agit d'une fonction qui permet d'afficher une liste des 5 derniers createurs ajoutées.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/list/home/creators', name: 'app_home_creators')]
     public function getCreators(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request): Response
     {
@@ -95,6 +116,13 @@ class HomeController extends AbstractController
         return new JsonResponse(['creators' => array_reverse($data)]);
     }
 
+    /**
+     * Il s'agit d'une fonction qui permet d'afficher une liste des 2 derniers lookbooks ajoutées.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/list/home/lookbooks', name: 'app_home_lookbooks')]
     public function getLookbooks(EntityManagerInterface $em, Request $request): Response
     {

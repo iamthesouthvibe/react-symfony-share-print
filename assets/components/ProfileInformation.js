@@ -39,31 +39,31 @@ function ProfileInformation() {
         const regexZip = /^\d+$/;
 
         if (firstname && (typeof firstname !== 'string' || !firstname.trim() || !regex.test(firstname))) {
-            errors.firstname = 'Le prénom doit être une chaîne de caractères';
+            errors.firstname = 'The field must be a string';
             setFirstnameError(errors.firstname);
         }
         if (lastname && (typeof lastname !== 'string' || !lastname.trim() || !regex.test(lastname))) {
-            errors.lastname = 'Le nom doit être une chaîne de caractères';
+            errors.lastname = 'The field must be a string';
             setLastnameError(errors.lastname);
         }
         if (address && (typeof address !== 'string' || !address.trim())) {
-            errors.address = 'L\'adresse doit être une chaîne de caractères';
+            errors.address = 'The field must be a string';
             setAddressError(errors.address);
         }
         if (country && (typeof country !== 'string' || !country.trim())) {
-            errors.country = 'Le pays doit être une chaîne de caractères';
+            errors.country = 'The field must be a string';
             setCountryError(errors.country);
         }
         if (city && (typeof city !== 'string' || !city.trim() || !regex.test(city))) {
-            errors.city = 'La ville doit être une chaîne de caractères';
+            errors.city = 'The field must be a string';
             setCityError(errors.city);
         }
         if (zip && (typeof zip !== 'string' || !zip.trim() || !regexZip.test(zip))) {
-            errors.zip = 'Le code postal doit être composé uniquement de chiffres';
+            errors.zip = 'The postal code must be composed of numbers only';
             setZipError(errors.zip);
         }
         if (email && (typeof email !== 'string' || !email.trim() || !validateEmail(email))) {
-            errors.email = 'L\'adresse e-mail n\'est pas valide';
+            errors.email = 'The email address is not valid';
             setEmailError(errors.email);
         }
 
@@ -189,7 +189,7 @@ function ProfileInformation() {
     /** VUE */
     return <>
         <div className="page-account-container">
-            <h2>Informations utilisateur</h2>
+            <h2>User information</h2>
             <form>
                 <div className="form-group">
                     <label>FirstName: </label>

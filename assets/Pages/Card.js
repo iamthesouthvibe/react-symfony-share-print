@@ -133,39 +133,39 @@ const Card = () => {
         const regexMobile = /^\d+$/;
 
         if (typeof firstname !== 'string' || !firstname.trim() || !regex.test(firstname)) {
-            errors.firstname = 'Le prénom doit être une chaîne de caractères';
+            errors.firstname = 'The field must be a string and cannot be empty';
             setFirstnameError(errors.firstname);
         }
         if (typeof lastname !== 'string' || !lastname.trim() || !regex.test(lastname)) {
-            errors.lastname = 'Le nom doit être une chaîne de caractères';
+            errors.lastname = 'The field must be a string and cannot be empty';
             setLastnameError(errors.lastname);
         }
         if (typeof address !== 'string' || !address.trim()) {
-            errors.address = 'L\'adresse doit être une chaîne de caractères';
+            errors.address = 'The field must be a string and cannot be empty';
             setAddressError(errors.address);
         }
         if (typeof city !== 'string' || !city.trim() || !regex.test(city)) {
-            errors.city = 'La ville doit être une chaîne de caractères';
+            errors.city = 'The field must be a string and cannot be empty';
             setCityError(errors.city);
         }
 
         if (typeof country !== 'string' || !country.trim() || !regex.test(country)) {
-            errors.country = 'La ville doit être une chaîne de caractères';
+            errors.country = 'The field must be a string and cannot be empty';
             setCountryError(errors.country);
         }
 
         if (typeof zip !== 'string' || !zip.trim() || !regexZip.test(zip)) {
-            errors.zip = 'Le code postal doit être composé uniquement de chiffres';
+            errors.zip = 'The postal code must be composed of numbers only';
             setZipError(errors.zip);
         }
 
         if (typeof mobile !== 'string' || !mobile.trim() || !regexMobile.test(mobile)) {
-            errors.mobile = 'Le numéro de téléphone doit être composé uniquement de chiffres';
+            errors.mobile = 'The postal code must be composed of numbers only';
             setMobileError(errors.mobile);
         }
 
         if (typeof email !== 'string' || !email.trim() || !validateEmail(email)) {
-            errors.email = 'L\'adresse e-mail n\'est pas valide';
+            errors.email = 'The email address is not valid';
             setEmailError(errors.email);
         }
 
@@ -320,7 +320,7 @@ const Card = () => {
                                 </div>
                             </div>
                         ))}
-                        <p className="totalprice">Prix total : {totalPrice}€</p>
+                        <p className="totalprice">Total price : {totalPrice}€</p>
 
                     </div>
                 </div>

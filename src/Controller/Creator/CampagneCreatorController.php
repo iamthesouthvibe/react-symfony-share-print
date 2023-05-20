@@ -169,16 +169,13 @@ class CampagneCreatorController extends AbstractController
         $LogServices->createCampagneLog($campagne, 'Campagne crée', 'CAMPAGNE_CREATE');
 
         // Email
-        // TODO:: REVOIR LES EMAILS ET LES TEMPLATES
         $emailService->sendEmail(
-            'emails/template.html.twig',
+            'emails/campagn-submitted.html.twig',
             [
-                'firstName' => $user->getFirstName() ?? '',
-                'lastName' => $user->getLastName() ?? '',
-                'message' => 'Votre campagne a bien été soumise. Vous recevrez un email de confirmation quand votre produit sera en ligne',
+                'campagne' => $campagne,
             ],
             $user->getEmail(),
-            'Votre campagne a bien été soumise'
+            'Your campaign has been successfully submitted !'
         );
 
         // Log

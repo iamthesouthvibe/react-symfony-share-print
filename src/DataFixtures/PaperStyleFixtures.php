@@ -14,12 +14,13 @@ class PaperStyleFixtures extends Fixture
         $paperStyle->setName('Couché');
         $paperStyle->setOrdre(0);
         $manager->persist($paperStyle);
+        $this->addReference('paper_couche', $paperStyle);
 
         $paperStyle = new PaperStyle();
         $paperStyle->setName('Non couché');
         $paperStyle->setOrdre(1);
         $manager->persist($paperStyle);
-
+        $this->addReference('paper_non_couche', $paperStyle);
 
         $manager->flush();
     }

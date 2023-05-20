@@ -60,12 +60,12 @@ class UpdateCampagnStatusCommand extends Command
                     [
                         'firstName' => $creator->getFirstName() ?? '',
                         'lastName' => $creator->getLastName() ?? '',
-                        'message' => 'Bonjour, votre campagne est désormais terminée. Vous avez vendu : '.$nbvente.' 
-                        affiches pour un bénéfice total de '.$campagne->getTotalBenefCreator().'€. Merci de renseignez votre
-                        email paypal afin de recevoir les bénéfices !',
+                        'message' => 'Hello, your campaign is now over. You sold: '.$nbvente.' 
+                        posters for a total profit of '.$campagne->getTotalBenefCreator().'€. Please fill in your
+                        paypal email to receive the benefits.',
                     ],
                     $creator->getEmail(),
-                    'Bravo votre campagne est terminé !'
+                    'Congratulations your campaign is over!'
                 );
 
                 $output->writeln(sprintf('Campagne status updated for #%d', $campagne->getId()));

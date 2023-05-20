@@ -1342,6 +1342,7 @@ a {
     flex-direction: row;
     justify-content: space-between;
     row-gap: 30px;
+    flex-wrap: wrap;
   }
 
   .page-lookbook-row img {
@@ -1927,6 +1928,7 @@ a {
     flex-direction: row;
     justify-content: space-between;
     row-gap: 30px;
+    flex-wrap: wrap;
   }
 
   .page-lookbook-row img {

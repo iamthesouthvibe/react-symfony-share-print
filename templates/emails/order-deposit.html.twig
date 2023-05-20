@@ -34,10 +34,11 @@
 	</head>
 	<body>
 		<h1>Shareprint</h1>
-		<h2 class="bg">We have taken your order into account!</h2>
+		<h2 class="bg">Your order is on its way!</h2>
 		<p>Hello
-			{{ name }}, Thank you for purchasing from the Carhartt WIP online store. Your order of
-			{{ createdAt }}, 2023 has been taken into account. A shipping confirmation and a tracking link will be sent to you as soon as your package leaves our warehouse.</p>
+			{{ name }}, your order has been deposited and received by post, you can track your order by clicking on the following url:
+			<a href={{ campagneOrders|first.purchase.shipCode }}>Click here !</a>
+		</p>
 		<br>
 
 		<h3>Delivery address</h3>
@@ -68,9 +69,10 @@
 				<br/>
 			</div>
 			<br>
+			<p>Total Price :
+				{{campagneOrders|first.purchase.totalPrice}}€</p>
 		{% endfor %}
-		<p>Total Price :
-			{{campagneOrders|first.purchase.totalPrice}}€</p>
+
 
 	</body>
 </html>

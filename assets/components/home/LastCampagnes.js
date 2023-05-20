@@ -119,11 +119,11 @@ export const LastCampagnes = () => {
                         </>
                     ))}
                 </div>
-                <NavLink to="/shop" className="call-to-action-home">Enter Shop</NavLink>
+                <NavLink to="/creators" className="call-to-action-home">See more</NavLink>
             </div>
             <div className="home-want-cell">
                 <h3 className="home-want-cell-paragraphe">Have a design idea? Head to our campaign builder to create your own custom products to sell.</h3>
-                <NavLink to="/shop" className="call-to-action-home-white">Do it now!</NavLink>
+                <NavLink to="/create_campagne" className="call-to-action-home-white">Do it now!</NavLink>
             </div>
             <div className="last-child-home">
                 <h2 className="subtitle-home">Lookbook</h2>
@@ -138,7 +138,7 @@ export const LastCampagnes = () => {
                         </>
                     ))}
                 </div>
-                <NavLink to="/shop" className="call-to-action-home">See more</NavLink>
+                <NavLink to="/lookbook" className="call-to-action-home">See more</NavLink>
             </div>
         </div >
     )

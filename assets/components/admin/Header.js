@@ -19,7 +19,7 @@ const styles = {
     header: {
         boxSizing: 'border- box',
         position: 'fixed',
-        left: '170px',
+        left: '210px',
         height: '72px',
         top: '0px',
         background: '#ffffff',

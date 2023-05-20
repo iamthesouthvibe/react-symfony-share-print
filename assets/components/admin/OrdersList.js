@@ -103,7 +103,7 @@ export const OrdersList = () => {
     // Pagination
     // Fetch data
     const [currentPage, setCurrentPage] = useState(1);
-    const [ordersPerPage] = useState(10);
+    const [ordersPerPage] = useState(15);
 
     const indexOfLastOrder = currentPage * ordersPerPage;
     const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
@@ -264,11 +264,14 @@ export const OrdersList = () => {
     const [idshipping, setIdshipping] = useState('');
     const [idorder, setIdorder] = useState('')
     const [isSaving, setIsSaving] = useState(false);
-
+    const [shippingError, setShippingError] = useState(false)
 
     const handleShippingStatus = (e) => {
-
         e.preventDefault();
+        if (!idshipping) {
+            setShippingError('Le champ id shipping ne peut pas être vide')
+            return
+        }
         setIsSaving(true);
         let formData = new FormData()
 
@@ -332,8 +335,8 @@ export const OrdersList = () => {
                     <option value="desc">Descending</option>
                     <option value="asc">Ascending</option>
                 </select>
-                <button onClick={handleDownloadPrint}>Print download</button>
-                <button onClick={handleDownloadOrderDelivery}>Delivery download</button>
+                <button onClick={handleDownloadPrint} style={{ ...styles.input, ...styles.buttonPrimary }}>Print download</button>
+                <button onClick={handleDownloadOrderDelivery} style={{ ...styles.input, ...styles.buttonPrimary }}>Delivery download</button>
             </div>
             <table>
                 <thead>
@@ -394,22 +397,26 @@ export const OrdersList = () => {
                 showModal && (
                     <div style={styles.modalContainer}>
                         <div>
-                            <h3>Vous allez changer le statut de en pris en charge par La Poste, veuillez entrer le l'id shipping </h3>
+                            <h3>Vous allez changer le statut en "declaratif receptionné", veuillez entrer l'id shipping </h3>
+                            <br />
                             <form>
                                 <div style={styles.flex}>
-                                    <label>
-                                        Id shipping : <br />
+                                    <div style={styles.formGroup}>
+                                        <label> Id shipping : </label>
                                         <input type="text" style={styles.input} value={idshipping} onChange={e => (setIdshipping(e.target.value))} />
-                                    </label>
-                                    <br />
+                                        {shippingError && <span className="error" style={{ ...styles.inputError }}>{shippingError}</span>}
+                                        <br />
+                                    </div>
                                 </div>
                                 <br />
-                                <button style={styles.input} onClick={() => {
-                                    setIdorder('');
-                                    setIdshipping('');
-                                    handleShowModal();
-                                }}>Annuler</button>
-                                <button type="submit" style={styles.input} onClick={handleShippingStatus}>Ajouter</button>
+                                <div style={styles.flex}>
+                                    <button type="submit" style={{ ...styles.input, ...styles.buttonPrimary }} onClick={handleShippingStatus}>Ajouter</button>
+                                    <button style={styles.input} onClick={() => {
+                                        setIdorder('');
+                                        setIdshipping('');
+                                        handleShowModal();
+                                    }}>Annuler</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -430,6 +437,11 @@ const styles = {
         padding: '0.5rem',
         margin: '0.5rem 0'
     },
+    formGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        rowGap: '0px'
+    },
     filtreContainer: {
         display: 'flex',
         gap: '10px'
@@ -447,7 +459,8 @@ const styles = {
         borderRadius: '0.4rem',
         height: '400px',
         width: '550px',
-        zIndex: '20'
+        zIndex: '20',
+        padding: '20px'
     },
     flex: {
         display: 'flex',
@@ -512,5 +525,13 @@ const styles = {
         fontSize: '13.5px',
         cursor: 'pointer',
         textDecoration: 'none'
+    },
+    buttonPrimary: {
+        backgroundColor: 'rgb(245, 78, 49)',
+        color: '#fff'
+    },
+    inputError: {
+        fontSize: '0.7rem',
+        color: '#d64d4d'
     }
 }

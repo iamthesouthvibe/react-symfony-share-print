@@ -2,6 +2,7 @@
 
 namespace App\Controller\admin;
 
+use App\Entity\CampagneOrder;
 use App\Entity\Order;
 use App\Entity\Shipping;
 use App\Entity\ShippingStatus;
@@ -20,6 +21,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AdminOrdersController extends AbstractController
 {
+    /**
+     * Il s'agit d'une fonction qui renvoit la liste des commandes.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/order/list', name: 'app_order_admin_list')]
     public function orderList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -65,6 +73,14 @@ class AdminOrdersController extends AbstractController
         return new JsonResponse(['orders' => $data]);
     }
 
+    /**
+     * Il s'agit d'une fonction qui renvoit le detail d'une commande.
+     *
+     * @param entityManagerInterface $em: une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param $id : id de la commande
+     * @param JWTEncoderInterface $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request             $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/order/detail/{id}', name: 'app_admin_details_order')]
     public function orderDetails(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -90,6 +106,11 @@ class AdminOrdersController extends AbstractController
         $lastShippingStatus = ($order->getShippings()->last() == true) ? $order->getShippings()->last()->getShippingStatus()->getLibelle() : 'À envoyer';
 
         $data = [
+            'id' => $order->getId(),
+            'customer_firstname' => $order->getCustomerFirstname(),
+            'customer_lastname' => $order->getCustomerLastname(),
+            'customer_email' => $order->getCustomerEmail(),
+            'customer_mobile' => $order->getCustomerMobile(),
             'createdAt' => $order->getCreatedAt()->format('Y-m-d'),
             'shipping_address' => $order->getCustomerAddress(),
             'shipping_city' => $order->getCustomerCity(),
@@ -110,8 +131,9 @@ class AdminOrdersController extends AbstractController
         foreach ($CampagneOrders as $CampagneOrder) {
             $CampagneOrdersData[] = [
                 'quantity' => $CampagneOrder->getQuantity(),
+                'campagne_id' => $CampagneOrder->getCampagne()->getId(),
                 'campagne_name' => $CampagneOrder->getCampagne()->getNameProject(),
-                'campagne_price' => $CampagneOrder->getCampagne()->getPrice(),
+                'campagne_price' => $CampagneOrder->getCampagne()->getPriceAti(),
                 'creatorId' => $CampagneOrder->getCampagne()->getUser()->getId(),
                 'campagne_filesource' => $CampagneOrder->getCampagne()->getFileSource().'.png',
                 'campagne_size' => $CampagneOrder->getCampagne()->getSize()->getName(),
@@ -125,6 +147,14 @@ class AdminOrdersController extends AbstractController
         return new JsonResponse(['order' => $data]);
     }
 
+    /**
+     * Il s'agit d'une fonction qui génére la liste des commandes à imprimer.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     * @param PdfService             $pdf:        Service de PDF
+     */
     #[Route('/api/admin/order/print', name: 'app_admin_print_order')]
     public function generatePrintPDF(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request, PdfService $pdf)
     {
@@ -161,6 +191,14 @@ class AdminOrdersController extends AbstractController
         ]);
     }
 
+    /**
+     * Il s'agit d'une fonction qui change le statut d'impression d'une commande.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     * @param $id : id de la commande
+     */
     #[Route('/api/admin/order/printstatus/{id}', name: 'app_print_status_campagne')]
     public function changePrintStatus(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -192,6 +230,14 @@ class AdminOrdersController extends AbstractController
         return new JsonResponse(['success' => 'La commande a été noté comme imprimé']);
     }
 
+    /**
+     * Il s'agit d'une fonction qui génére la liste des commandes à envoyer.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     * @param PdfService             $pdf:        Service de PDF
+     */
     #[Route('/api/admin/print/delivery', name: 'app_admin_print_delivery')]
     public function exportOrders(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request): Response
     {
@@ -256,6 +302,14 @@ class AdminOrdersController extends AbstractController
         }
     }
 
+    /**
+     * Il s'agit d'une fonction qui change le statut d'envoi d'une commande.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     * @param $id : id de la commande
+     */
     #[Route('/api/admin/order/shippingstatus/{id}', name: 'app_shipping_status_campagne')]
     public function changeShippingStatus(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, EmailService $emailService)
     {
@@ -294,16 +348,17 @@ class AdminOrdersController extends AbstractController
             $em->persist($shipping);
             $em->flush();
 
+            $campagneOrders = $em->getRepository(CampagneOrder::class)->findBy(['purchase' => $order]);
+
             $emailService->sendEmail(
-                'emails/template.html.twig',
+                'emails/order-deposit.html.twig',
                 [
-                    'firstName' => $order->getCustomerFirstname() ?? '',
-                    'lastName' => $order->getCustomerLastname() ?? '',
-                    'message' => 'Bonjour votre commande a été déposé réceptionné par laposte, vous pouvez
-                                suivre votre commande en cliquant sur l\'url suivante : https://www.laposte.fr/outils/suivre-vos-envois?code='.$order->getShipCode(),
+                    'name' => $order->getCustomerFirstname().' '.$order->getCustomerLastname() ?? '',
+                    'createdAt' => $order->getCreatedAt()->format('Y-m-d'),
+                    'campagneOrders' => $campagneOrders,
                 ],
                 $order->getCustomerEmail(),
-                'Votre commande est en route !'
+                'Your order is on its way!'
             );
             // $logServices->createCampagneLog($campagne, 'Campagne refusée', 'CAMPAGNE_REJECT');
 

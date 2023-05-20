@@ -27,27 +27,27 @@ export const CreatorProfilForm = () => {
         const errors = {};
 
         if (instagram && !(typeof instagram === 'string' && instagram.includes('https://'))) {
-            errors.instagram = 'Attention le champ instagram doit être un lien vers votre instagram';
+            errors.instagram = 'The instagram field must be a link to your instagram';
             setInstagramError(errors.instagram);
         }
 
         if (behance && !(typeof behance === 'string' && behance.includes('https://'))) {
-            errors.behance = 'Attention le champ behance doit être un lien vers votre behance';
+            errors.behance = 'The behance field must be a link to your behance';
             setBehanceError(errors.behance);
         }
 
         if (dribble && !(typeof dribble === 'string' && dribble.includes('https://'))) {
-            errors.dribble = 'Attention le champ dribble doit être un lien vers votre dribble';
+            errors.dribble = 'The dribble field must be a link to your dribble';
             setDribbleError(errors.dribble);
         }
 
         if (linkedin && !(typeof linkedin === 'string' && linkedin.includes('https://'))) {
-            errors.linkedin = 'Attention le champ linkedin doit être un lien vers votre linkedin';
+            errors.linkedin = 'The linkedin field must be a link to your linkedin';
             setLinkedinError(errors.linkedin);
         }
 
         if (file && !acceptedFileTypes.includes(fileExtension)) {
-            errors.file = 'Attention le fichier doit etre au format jpeg, jpg ou png';
+            errors.file = 'The file must be in jpeg, jpg or png format';
             setFileError(errors.file);
         }
 

@@ -16,6 +16,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AdminUserProfileController extends AbstractController
 {
+    /**
+     * Il s'agit d'une fonction qui renvoit la liste des utilisateurs.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/list/users', name: 'app_list_user')]
     public function getUserList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -65,6 +72,14 @@ class AdminUserProfileController extends AbstractController
         return new JsonResponse(['users' => $data, 'logs' => array_reverse($dataLogs)]);
     }
 
+    /**
+     * Il s'agit d'une fonction qui renvoit les details d'un utilisateur.
+     *
+     * @param entityManagerInterface $em: une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param $id : id de l'utilisateur
+     * @param JWTEncoderInterface $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request             $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/user/detail/{id}', name: 'app_details_user')]
     public function details(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request)
     {
@@ -132,6 +147,14 @@ class AdminUserProfileController extends AbstractController
         ], $data));
     }
 
+    /**
+     * Il s'agit d'une fonction qui permet de supprimer un utilisateur.
+     *
+     * @param entityManagerInterface $em: une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param $id : id de l'utilisateur
+     * @param JWTEncoderInterface $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request             $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/user/delete/{id}', name: 'app_delete_user')]
     public function deleteUser(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $LogServices)
     {
@@ -165,6 +188,14 @@ class AdminUserProfileController extends AbstractController
         return new JsonResponse(['success' => 'L\'utilisateur a bien été supprimé !']);
     }
 
+    /**
+     * Il s'agit d'une fonction qui permet d'ajouter ou de modifier un utilisateur.
+     *
+     * @param entityManagerInterface $em: une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param $id : id de l'utilisateur
+     * @param JWTEncoderInterface $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request             $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/add/user/{id}', name: 'app_add_user')]
     public function register(EntityManagerInterface $em, $id = null, UserPasswordHasherInterface $passwordHasher, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $LogServices)
     {
@@ -239,6 +270,14 @@ class AdminUserProfileController extends AbstractController
         return new JsonResponse(['message' => 'User created successfully'], 201);
     }
 
+    /**
+     * Il s'agit d'une fonction qui permet d'envoyer un email à un utilisateur.
+     *
+     * @param entityManagerInterface $em: une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param $id : id de l'utilisateur
+     * @param JWTEncoderInterface $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request             $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/user/send/email/{id}', name: 'app_send_email_user')]
     public function sendEmail(EntityManagerInterface $em, $id = null, UserPasswordHasherInterface $passwordHasher, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $LogServices, EmailService $emailService)
     {

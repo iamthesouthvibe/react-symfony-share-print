@@ -24,19 +24,19 @@ function Register() {
     const validateCustomerData = () => {
         const errors = {};
         if (!email) {
-            errors.email = 'L\'adresse e-mail ne peut pas être vide';
+            errors.email = 'Email address cannot be empty';
             setEmailError(errors.email);
         } else if (typeof email !== 'string' || !email.trim() || !validateEmail(email)) {
-            errors.email = 'L\'adresse e-mail n\'est pas valide';
+            errors.email = 'The email address is invalid';
             setEmailError(errors.email);
         }
 
         if (!password) {
-            errors.password = 'Le mot de passe ne peut pas être vide';
+            errors.password = 'Password cannot be empty';
             setPasswordError(errors.password);
         } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
             errors.password =
-                "Le mot de passe doit contenir au moins un chiffre et faire plus de 8 caractères";
+                "The password must contain at least one number and be longer than 8 characters";
             setPasswordError(errors.password);
         }
 

@@ -5,6 +5,7 @@ namespace App\Controller\admin;
 use App\Entity\Campagne;
 use App\Entity\CampagneStatus;
 use App\Entity\User;
+use App\Services\EmailService;
 use App\Services\LogServices;
 use App\Services\PaypalTransferService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -187,10 +188,13 @@ class AdminCampagneController extends AbstractController
             }
         }
 
-        $createdAt = $campagne->getAcceptedAt()->format('Y-m-d');
-        $today = date('Y-m-d');
-        $diff = abs(strtotime($today) - strtotime($createdAt));
-        $days = floor($diff / (60 * 60 * 24));
+        if ($campagne->getAcceptedAt()) {
+            $createdAt = $campagne->getAcceptedAt()->format('Y-m-d');
+            $today = date('Y-m-d');
+            $diff = abs(strtotime($today) - strtotime($createdAt));
+            $days = floor($diff / (60 * 60 * 24));
+        }
+
         $data = [
             'id' => $campagne->getId(),
             'userid' => $campagne->getUser()->getId(),
@@ -210,8 +214,9 @@ class AdminCampagneController extends AbstractController
             'payoutfirstname' => $campagne->getUser()->getCreatorProfil()->getPayoutFirstname() ?? '',
             'payoutlastname' => $campagne->getUser()->getCreatorProfil()->getPayoutLastName() ?? '',
             'paypalemail' => $campagne->getUser()->getCreatorProfil()->getPaypalEmail() ?? '',
-            'createdAt' => $createdAt,
-            'days' => $days,
+            'createdAt' => $createdAt ?? null,
+            'days' => $days ?? null,
+            'description' => $campagne->getDescription(),
             'nbvente' => $nbvente,
             'ca' => $campagne->getTotalCa() ?? 0,
             'benefCreator' => $campagne->getTotalBenefCreator() ?? 0,
@@ -222,8 +227,15 @@ class AdminCampagneController extends AbstractController
         return new JsonResponse($data);
     }
 
+    /**
+     * Il s'agit d'une fonction qui permet d'accepter la campagne.
+     *
+     * @param entityManagerInterface $em:      une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param                        $id:      id de la campagne
+     * @param request                $request: une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/campagne/accept/{id}', name: 'app_accept_campagne')]
-    public function acceptCampagne(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, SluggerInterface $slugger, LogServices $logServices)
+    public function acceptCampagne(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, SluggerInterface $slugger, LogServices $logServices, EmailService $emailService)
     {
         $campagne = $em
             ->getRepository(Campagne::class)
@@ -257,13 +269,27 @@ class AdminCampagneController extends AbstractController
 
         $logServices->createCampagneLog($campagne, 'Campagne accepté', 'CAMPAGNE_CREATE');
 
-        // TODO:: Envoyer un email à l'utilisateur
+        $emailService->sendEmail(
+            'emails/campagn-accepted.html.twig',
+            [
+                'campagne' => $campagne,
+            ],
+            $campagne->getUser()->getEmail(),
+            'Your campaign has been successfully accepted!'
+        );
 
         return new JsonResponse(['success' => 'Campagne accepté avec succés']);
     }
 
+    /**
+     * Il s'agit d'une fonction qui permet de refuser la campagne.
+     *
+     * @param entityManagerInterface $em:      une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param                        $id:      id de la campagne
+     * @param request                $request: une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/admin/campagne/reject/{id}', name: 'app_reject_campagne')]
-    public function rejectCampagne(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $logServices)
+    public function rejectCampagne(EntityManagerInterface $em, $id, JWTEncoderInterface $jwtEncoder, Request $request, LogServices $logServices, EmailService $emailService)
     {
         $campagne = $em
             ->getRepository(Campagne::class)
@@ -284,6 +310,15 @@ class AdminCampagneController extends AbstractController
         $em->flush();
 
         $logServices->createCampagneLog($campagne, 'Campagne refusée', 'CAMPAGNE_REJECT');
+
+        $emailService->sendEmail(
+            'emails/campagn-rejected.html.twig',
+            [
+                'campagne' => $campagne,
+            ],
+            $campagne->getUser()->getEmail(),
+            'Your campaign has been declined'
+        );
 
         return new JsonResponse(['success' => 'Campagne refusée avec succès']);
     }

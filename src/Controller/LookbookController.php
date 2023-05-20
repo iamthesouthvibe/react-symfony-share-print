@@ -13,6 +13,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class LookbookController extends AbstractController
 {
+    /**
+     * Il s'agit d'une fonction qui permet d'afficher la liste des lookbooks.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/lookbook/list', name: 'app_lookbook_list_client')]
     public function getLoobbookList(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request)
     {

@@ -14,6 +14,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class LoginController extends AbstractController
 {
+    /**
+     * Il s'agit d'une fonction qui permet d'identifier un utilisateur.
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/login', name: 'app_login')]
     public function login(ManagerRegistry $doctrine, Request $request, UserPasswordHasherInterface $encoder, JWTTokenManagerInterface $JWTManager, JWTEncoderInterface $JWTEncoder)
     {

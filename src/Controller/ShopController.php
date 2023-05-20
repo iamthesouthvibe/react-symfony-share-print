@@ -13,6 +13,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ShopController extends AbstractController
 {
+    /**
+     * Il s'agit d'une fonction qui permet d'afficher la liste des produits (campagnes).
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/list/shop', name: 'app_shop')]
     public function index(EntityManagerInterface $em, JWTEncoderInterface $jwtEncoder, Request $request): Response
     {
@@ -46,6 +53,13 @@ class ShopController extends AbstractController
         return new JsonResponse(['campagnes' => array_reverse($data)]);
     }
 
+    /**
+     * Il s'agit d'une fonction qui permet d'afficher le detail d'un produit (campagne).
+     *
+     * @param entityManagerInterface $em:         une instance de la EntityManagerInterfaceclasse, utilisée pour conserver les données dans la base de données
+     * @param JWTEncoderInterface    $jwtEncoder: une instance de la JWTEncoderInterfaceclasse, utilisée pour décoder le JSON Web Token (JWT) envoyé dans l'en-tête de la requête pour authentifier l'utilisateur
+     * @param request                $request:    une instance de la classe Request, qui contient des informations sur la requête HTTP
+     */
     #[Route('/api/shop/product/details/{slug}', name: 'app_shop_product_details')]
     public function productDetails(EntityManagerInterface $em, string $slug, Request $request): Response
     {
