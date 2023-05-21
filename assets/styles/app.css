@@ -525,6 +525,7 @@ a {
 
 .shop-detail-page .creator-container {
   margin-top: 50px;
+  margin-bottom: 50px;
 }
 
 .campaign-container-shop-row {
@@ -541,11 +542,22 @@ a {
   margin: 0 8px;
 }
 
+.logout-button {
+  font-size: 1.8rem;
+  background: #000;
+  border: none;
+  color: #fff;
+}
+
 .page-card {
   display: flex;
   gap: 20px;
   overflow: hidden;
   flex-direction: column-reverse;
+}
+
+.page-design-your {
+  flex-direction: column;
 }
 
 .page-card-checkout-container {
@@ -646,7 +658,7 @@ a {
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
-  width: 100%;
+  width: 96%;
   margin-bottom: 20px;
 }
 

@@ -198,7 +198,7 @@ export const CampagneForm = () => {
     return (
         <>
             <div>
-                <div className="page-card">
+                <div className="page-card page-design-your">
                     <div className="page-card-checkout-container">
                         <h1>Design your own</h1>
                         <form>

@@ -247,7 +247,7 @@ const CampagnesList = () => {
                                 </div>
                                 <div>
                                     <h6 style={styles.subtitle}>Days</h6>
-                                    <p style={styles.paragraph}>{campagne.days}</p>
+                                    <p style={styles.paragraph}>{45 - campagne.days}</p>
                                 </div>
                             </div>
                         </div>

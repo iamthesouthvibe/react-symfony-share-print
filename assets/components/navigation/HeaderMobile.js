@@ -78,7 +78,7 @@ const HeaderMobile = () => {
                             <div className="underline-mobile"></div>
                             <NavLink to="/account"> {isAuthenticated ? 'Account' : 'Sign in'}</NavLink>
                             <div className="underline-mobile"></div>
-                            {isAuthenticated ? <button onClick={handleLogout}>Logout</button> : ''}
+                            {isAuthenticated ? <button className="logout-button" onClick={handleLogout}>Logout</button> : ''}
                         </div>
                         <div className="header-mobile-container-bottom">
                             {/* <NavLink
