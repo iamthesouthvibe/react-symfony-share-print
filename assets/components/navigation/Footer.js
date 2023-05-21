@@ -7,22 +7,22 @@ const Footer = () => {
             <div className="footer-top">
                 <div>
                     <p>About</p>
-                    <NavLink to="/shop">
+                    <NavLink to="/">
                         Home
                 </NavLink>
                     <NavLink to="/shop">
                         Shop
                 </NavLink>
-                    <NavLink to="/shop">
+                    <NavLink to="/create_campagne">
                         Design your own
                 </NavLink>
-                    <NavLink to="/shop">
+                    <NavLink to="/how-its-work">
                         How it works
                 </NavLink>
-                    <NavLink to="/shop">
+                    <NavLink to="/creators">
                         Designer & Studios
                 </NavLink>
-                    <NavLink to="/shop">
+                    <NavLink to="/lookbook">
                         Lookbook
                 </NavLink>
 
@@ -31,32 +31,32 @@ const Footer = () => {
                 </div>
                 <div>
                     <p>Customer Service</p>
-                    <NavLink to="/shop">
+                    <NavLink to="/">
                         Contact
                 </NavLink>
-                    <NavLink to="/shop">
+                    <NavLink to="/">
                         Faq
                 </NavLink>
                 </div>
                 <div>
                     <p>Payment methods</p>
-                    <NavLink to="/shop">
+                    <NavLink to="/">
                         MasterCard
                 </NavLink>
-                    <NavLink to="/shop">
+                    <NavLink to="/">
                         Visa
                 </NavLink>
                 </div>
             </div>
 
             <div className="footer-bottom">
-                <NavLink to="/shop">
+                <NavLink to="/">
                     Terms & Conditions
                 </NavLink>
-                <NavLink to="/shop">
+                <NavLink to="/">
                     Privacy Policy
                 </NavLink>
-                <NavLink to="/shop">
+                <NavLink to="/">
                     CopyRight - PrintShare 2023
                 </NavLink>
             </div>
