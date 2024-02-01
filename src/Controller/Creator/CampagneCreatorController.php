@@ -12,6 +12,7 @@ use App\Entity\User;
 use App\Services\EmailService;
 use App\Services\LogServices;
 use Doctrine\ORM\EntityManagerInterface;
+use Intervention\Image\ImageManagerStatic as Image;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Spatie\PdfToImage\Pdf;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -99,6 +100,11 @@ class CampagneCreatorController extends AbstractController
             $pdf->setOutputFormat('png')
                     ->setResolution(60)
                     ->saveImage($outputImagePath);
+
+            // Vérifier si le format du PDF est A2
+            if (!$this->isPdfA2Format($new_dir_path.'/'.$newFilenamePdf)) {
+                return new JsonResponse(['error' => 'Le format du PDF doit être A2.'], 400);
+            }
 
             // Creation numéro de commande
             $lastObject = $em->getRepository(Campagne::class)->findBy([], ['id' => 'DESC'], 1, 0);
@@ -311,5 +317,26 @@ class CampagneCreatorController extends AbstractController
          ];
 
         return new JsonResponse(['creator' => array_reverse($data)], 201);
+    }
+
+    /**
+     * Vérifier si le format du PDF est A2.
+     *
+     * @param string $pdfPath Chemin du fichier PDF
+     *
+     * @return bool True si le format est A2, sinon False
+     */
+    private function isPdfA2Format(string $pdfPath): bool
+    {
+        $pdf = new Pdf($pdfPath);
+        // Check le DPI
+        // Si inférieur à 300 renvoyé une erreur
+        // Si ok check si le width et le height correspond
+        // 4 961 x 7 016 px
+        dd($pdf->imagick->getImageWidth(), $pdf->imagick->getImageHeight(), $pdf->imagick->getImageResolution());
+        $size = $pdf->getPageSize();
+
+        // Comparer la taille du PDF avec le format A2
+        return $size['width'] === 420 && $size['height'] === 594;
     }
 }
