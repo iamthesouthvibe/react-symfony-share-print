@@ -68,6 +68,8 @@ class CampagneCreatorController extends AbstractController
             // Téléchargement d'un fichier PDF envoyé dans la demande vers un répertoire spécifié sur le serveur
             /** @var UploadedFile $uploadedFile */
             $fileSource = $request->files->get('file');
+            // Vérifier si le format du PDF
+            $this->isPdfAFormat($fileSource, $request->request->get('size'));
             $extension = pathinfo($fileSource->getClientOriginalName(), PATHINFO_EXTENSION);
             $originalFilename = pathinfo($fileSource->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $slugger->slug($originalFilename);
@@ -100,11 +102,6 @@ class CampagneCreatorController extends AbstractController
             $pdf->setOutputFormat('png')
                     ->setResolution(60)
                     ->saveImage($outputImagePath);
-
-            // Vérifier si le format du PDF est A2
-            if (!$this->isPdfA2Format($new_dir_path.'/'.$newFilenamePdf)) {
-                return new JsonResponse(['error' => 'Le format du PDF doit être A2.'], 400);
-            }
 
             // Creation numéro de commande
             $lastObject = $em->getRepository(Campagne::class)->findBy([], ['id' => 'DESC'], 1, 0);
@@ -322,21 +319,37 @@ class CampagneCreatorController extends AbstractController
     /**
      * Vérifier si le format du PDF est A2.
      *
-     * @param string $pdfPath Chemin du fichier PDF
-     *
-     * @return bool True si le format est A2, sinon False
+     * @param $pdfPath Chemin du fichier PDF
      */
-    private function isPdfA2Format(string $pdfPath): bool
+    private function isPdfAFormat($pdfPath, string $format)
     {
         $pdf = new Pdf($pdfPath);
         // Check le DPI
         // Si inférieur à 300 renvoyé une erreur
-        // Si ok check si le width et le height correspond
-        // 4 961 x 7 016 px
-        dd($pdf->imagick->getImageWidth(), $pdf->imagick->getImageHeight(), $pdf->imagick->getImageResolution());
-        $size = $pdf->getPageSize();
+        $resolution = $pdf->imagick->getImageResolution();
+        if ($resolution['x'] < 300) {
+            // TODO:: voir l'erreur à renvoyer
+            return new JsonResponse(['error' => 'La résolution est inférieur à 300'], 404);
+        }
 
-        // Comparer la taille du PDF avec le format A2
-        return $size['width'] === 420 && $size['height'] === 594;
+        // Si ok check si le width et le height correspond
+        if ($format == 'A2') {
+            if ($pdf->imagick->getImageWidth() !== 4961 || $pdf->imagick->getImageHeight() !== 7016) {
+                // TODO:: voir l'erreur à renvoyer
+                return new JsonResponse(['error' => 'Le fichier uploader ne correspond pas à la dimension d\'un A2'], 404);
+            }
+        } elseif ($format == 'A3') {
+            if ($pdf->imagick->getImageWidth() !== 3508 || $pdf->imagick->getImageHeight() !== 4960) {
+                // TODO:: voir l'erreur à renvoyer
+                return new JsonResponse(['error' => 'Le fichier uploader ne correspond pas à la dimension d\'un A3'], 404);
+            }
+        } elseif ($format == 'A4') {
+            if ($pdf->imagick->getImageWidth() !== 2480 || $pdf->imagick->getImageHeight() !== 3508) {
+                // TODO:: voir l'erreur à renvoyer
+                return new JsonResponse(['error' => 'Le fichier uploader ne correspond pas à la dimension d\'un A4'], 404);
+            }
+        }
+
+        return false;
     }
 }
